@@ -1,0 +1,11 @@
+{
+    "CGC_SENSOR_RELATED":           "0x00",
+    "CGC_AIR_CONDITIONER_RELATED":  "0x01",
+    "CGC_HOUSING_RELATED":          "0x02",
+    "CGC_COOKING_RELATED":          "0x03",
+    "CGC_HEALTH_RELATED":           "0x04",
+    "CGC_MANAGEMENT_RELATED":       "0x05",
+    "CGC_AV_RELATED":               "0x06",
+    "CGC_PROFILE_CLASS":            "0x0E",
+    "CGC_USER_DEFINITION_CLASS":    "0x0F"
+}
