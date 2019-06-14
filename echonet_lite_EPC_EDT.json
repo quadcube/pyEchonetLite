@@ -253,6 +253,72 @@
             "announce_status_change":   false
         }
     },
+    "CGC_ALL_CLASS": {
+        "EPC_ON_TIMER_BASED_RESERVATION_SETTING": {
+            "value":                    "0x90",
+            "time_relative_time_on":    "0x41",
+            "time_relative_time_off":   "0x42",
+            "time_on":                  "0x43",
+            "relative_time_on":         "0x44",
+            "data_type":                "unsigned char",
+            "size":                     1,
+            "access":                   ["set", "get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_ON_TIMER_SETTING_TIME": {
+            "value":                    "0x91",
+            "EDT":                      "",
+            "range":                    [["0x00", "0x17"], ["0x00", "0x3B"]],
+            "data_type":                "unsigned char",
+            "size":                     2,
+            "access":                   ["set", "get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_ON_TIMER_SETTING_RELATIVE_TIME": {
+            "value":                    "0x92",
+            "EDT":                      "",
+            "range":                    [["0x00", "0xFF"], ["0x00", "0x3B"]],
+            "data_type":                "unsigned char",
+            "size":                     2,
+            "access":                   ["set", "get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_OFF_TIMER_BASED_RESERVATION_SETTING": {
+            "value":                    "0x94",
+            "time_relative_time_on":    "0x41",
+            "time_relative_time_off":   "0x42",
+            "time_on":                  "0x43",
+            "relative_time_on":         "0x44",
+            "data_type":                "unsigned char",
+            "size":                     1,
+            "access":                   ["set", "get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_OFF_TIMER_SETTING_TIME": {
+            "value":                    "0x95",
+            "EDT":                      "",
+            "range":                    [["0x00", "0x17"], ["0x00", "0x3B"]],
+            "data_type":                "unsigned char",
+            "size":                     2,
+            "access":                   ["set", "get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_OFF_TIMER_SETTING_RELATIVE_TIME": {
+            "value":                    "0x96",
+            "EDT":                      "",
+            "range":                    [["0x00", "0xFF"], ["0x00", "0x3B"]],
+            "data_type":                "unsigned char",
+            "size":                     2,
+            "access":                   ["set", "get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        }
+    },
     "CGC_SENSOR_RELATED": {
         "EPC_THRESHOLD_LEVEL": {
             "value":                    "0xB0",
@@ -455,67 +521,193 @@
     "CC_CO2_SENSOR": {
         "EPC_CO2_CONCENTRATION_VALUE": {
             "value":                    "0xE0",
+            "EDT":                      "",
+            "range":                    ["0x0000", "0xFFFD"],
+            "data_type":                "unsigned short",
+            "size":                     2,
+            "unit":                     "ppm",
+            "access":                   ["get"],
+            "mandatory":                ["get"],
+            "announce_status_change":   false
         }
     },
     "CC_GAS_SENSOR": {
         "EPC_GAS_CONCENTRATION_VALUE": {
             "value":                    "0xE0",
+            "EDT":                      "",
+            "range":                    ["0x0000", "0xFFFD"],
+            "data_type":                "unsigned short",
+            "size":                     2,
+            "unit":                     "ppm",
+            "access":                   ["get"],
+            "mandatory":                ["get"],
+            "announce_status_change":   false
         }
     },
     "CC_VOC_SENSOR": {
         "EPC_VOC_CONCENTRATION_VALUE": {
             "value":                    "0xE0",
+            "EDT":                      "",
+            "range":                    ["0x0000", "0xFFFD"],
+            "data_type":                "unsigned short",
+            "size":                     2,
+            "unit":                     "ppm",
+            "access":                   ["get"],
+            "mandatory":                ["get"],
+            "announce_status_change":   false
         }
     },
     "CC_DIFFERENTIAL_PRESSURE_SENSOR": {
         "EPC_MEASURE_DIFFERENTIAL_PRESSURE_VALUE": {
             "value":                    "0xE0",
+            "EDT":                      "",
+            "range":                    ["0x8001", "0x7FFE"],
+            "data_type":                "signed short",
+            "size":                     2,
+            "unit":                     "Pa",
+            "access":                   ["get"],
+            "mandatory":                ["get"],
+            "announce_status_change":   false
         }
     },
     "CC_AIR_SPEED_SENSOR": {
         "EPC_MEASURE_AIR_SPEED_VALUE": {
             "value":                    "0xE0",
+            "EDT":                      "",
+            "range":                    ["0x0000", "0xFFFD"],
+            "data_type":                "unsigned short",
+            "size":                     2,
+            "unit":                     "0.01 m/sec",
+            "access":                   ["get"],
+            "mandatory":                ["get"],
+            "announce_status_change":   false
         },
         "EPC_AIR_FLOW_DIRECTION": {
             "value":                    "0xE1",
+            "EDT":                      "",
+            "range":                    ["0x0000", "0x0168"],
+            "data_type":                "unsigned short",
+            "size":                     2,
+            "unit":                     "degree",
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
         }
     },
     "CC_ODOR_SENSOR": {
         "EPC_MEASURE_ODOR_VALUE": {
             "value":                    "0xE0",
+            "EDT":                      "",
+            "range":                    ["0x00", "0xFD"],
+            "data_type":                "unsigned char",
+            "size":                     1,
+            "access":                   ["get"],
+            "mandatory":                ["get"],
+            "announce_status_change":   false
         }
     },
     "CC_ELECTRIC_ENERGY_SENSOR": {
         "EPC_CUMULATIVE_AMOUNT_ELECTRIC_ENERGY": {
             "value":                    "0xE0",
+            "EDT":                      "",
+            "range":                    ["0x00000000", "0x3B9AC9FF"],
+            "data_type":                "unsigned long",
+            "size":                     4,
+            "unit":                     "0.001 kWh",
+            "access":                   ["get"],
+            "mandatory":                ["get"],
+            "announce_status_change":   false
         },
         "EPC_MEDIUM_CAPACITY_SENSOR_INSTANTANEOUS_ELECTRIC_ENERGY": {
             "value":                    "0xE1",
+            "EDT":                      "",
+            "range":                    ["0xC4653601", "0x3B9AC9FF"],
+            "data_type":                "signed long",
+            "size":                     4,
+            "unit":                     "W",
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
         },
         "EPC_SMALL_CAPACITY_SENSOR_INSTATANEOUS_ELECTRIC_ENERGY": {
             "value":                    "0xE2",
-          
+            "EDT":                      "",
+            "range":                    ["0x8001", "0x7FFE"],
+            "data_type":                "signed short",
+            "size":                     2,
+            "unit":                     "0.1 W",
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
         },
         "EPC_LARGE_CAPACITY_SENSOR_INSTATANEOUS_ELECTRIC_ENERGY": {
             "value":                    "0xE3",
+            "EDT":                      "",
+            "range":                    ["0x8001", "0x7FFE"],
+            "data_type":                "signed short",
+            "size":                     2,
+            "unit":                     "0.1 kW",
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
             
         },
         "EPC_CUMULATIVE_AMOUNT_ELECTRIC_ENERGY_MEASUREMENT_LOG": {
             "value":                    "0xE4",
+            "EDT":                      "",
+            "range":                    ["0x0000000", "0x3B9AC9F"],
+            "data_type":                "unsigned long",
+            "size":                     192,
+            "unit":                     "0.001 kWh",
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
         },
         "EPC_EFFECTIVE_VOLTAGE_VALUE": {
-            "value":                     "0xE5",
+            "value":                    "0xE5",
+            "EDT":                      "",
+            "range":                    ["0x0000", "0xFFFD"],
+            "data_type":                "unsigned short",
+            "size":                     2,
+            "unit":                     "V",
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
         }
     },
     "CC_CURRENT_VALUE_SENSOR": {
         "EPC_MEASURE_CURRENT_VALUE_1": {
             "value":                    "0xE0",
+            "EDT":                      "",
+            "range":                    ["0x00000000", "0xFFFFFFFD"],
+            "data_type":                "unsigned long",
+            "size":                     4,
+            "unit":                     "mA",
+            "access":                   ["get"],
+            "mandatory":                ["get"],
+            "announce_status_change":   false
         },
         "EPC_RATED_VOLTAGE_TO_BE_MEASURED": {
             "value":                    "0xE1",
+            "EDT":                      "",
+            "range":                    ["0x0000", "0xFFFD"],
+            "data_type":                "unsigned short",
+            "size":                     2,
+            "unit":                     "V",
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
         },
         "EPC_MEASURE_CURRENT_VALUE_2": {
             "value":                    "0xE2",
+            "EDT":                      "",
+            "range":                    ["0x80000001", "0x7FFFFFFFE"],
+            "data_type":                "signed long",
+            "size":                     4,
+            "unit":                     "mA",
+            "access":                   ["get"],
+            "mandatory":                ["get"],
+            "announce_status_change":   false
         }
     },
     "CC_DAYLIGHT_SENSOR": {
@@ -524,80 +716,177 @@
     "CC_WATER_FLOW_RATE_SENSOR": {
         "EPC_CUMULATIVE_FLOW_RATE": {
             "value":                    "0xE0",
+            "EDT":                      "",
+            "range":                    ["0x00000000", "0x3B9AC9FF"],
+            "data_type":                "unsigned long",
+            "size":                     4,
+            "unit":                     "cm^3",
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
         },
         "EPC_FLOW_RATE": {
             "value":                    "0xE2",
+            "EDT":                      "",
+            "range":                    ["0x00000000", "0x3B9AC9FF"],
+            "data_type":                "unsigned long",
+            "size":                     4,
+            "unit":                     "cm^3/min",
+            "access":                   ["get"],
+            "mandatory":                ["get"],
+            "announce_status_change":   false
         }
     },
     "CC_PASSAGE_SENSOR": {
         "EPC_PASSAGE_DETECTION_DIRECTION": {
             "value":                    "0xE0",
+            "EDT":                      "",
+            "range":                    ["0x30", ["0x31", "0x38"], "0x39"],
+            "data_type":                "unsigned char",
+            "size":                     1,
+            "access":                   ["get"],
+            "mandatory":                ["get"],
+            "announce_status_change":   true
         }
     },
     "CC_OPEN_CLOSE_SENSOR": {
         "EPC_DEGREE_OF_OPENING_DETECTION_STATUS_1": {
             "value":                    "0xE0",
+            "EDT":                      "",
+            "range":                    ["0x30", ["0x31", "0x38"], "0x39"],
+            "data_type":                "unsigned char",
+            "size":                     1,
+            "access":                   ["get"],
+            "mandatory":                ["get"],
+            "announce_status_change":   true
         }
     },
     "CC_ACTIVITY_AMOUNT_SENSOR": {
         "EPC_ACTIVITY_AMOUNT_LEVEL_1": {
             "value":                    "0xE0",
+            "EDT":                      "",
+            "range":                    ["0x31", "0x38"],
+            "data_type":                "unsigned char",
+            "size":                     128,
+            "access":                   ["getM"],
+            "mandatory":                ["getM"],
+            "announce_status_change":   false
         },
         "EPC_MAXIMUM_NUMBER_OF_HUMAN_BODY_ID": {
             "value":                    "0xE1",
+            "EDT":                      "",
+            "range":                    ["0x0001", "0x0080"],
+            "data_type":                "unsigned short",
+            "size":                     2,
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
         },
         "EPC_ACTIVITY_AMOUNT_LEVEL_2": {
             "value":                    "0xE2",
+            "EDT":                      "",
+            "range":                    ["0x31", "0x38"],
+            "data_type":                "unsigned char",
+            "size":                     1,
+            "access":                   ["get"],
+            "mandatory":                ["get"],
+            "announce_status_change":   false
         },
         "EPC_HUMAN_BODY_EXISTENCE_INFORMATION": {
             "value":                    "0xE3",
+            "EDT":                      "",
+            "range":                    ["0x00", "0x7F"],
+            "data_type":                "unsigned char",
+            "size":                     16,
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
         }
     },
     "CC_HUMAN_BODY_LOCATION_SENSOR": {
         "EPC_HUMAN_BODY_DETECTION_LOCATION_1": {
             "value":                    "0xE0",
+            "EDT":                      "",
+            "range":                    ["0x00", "0x7F"],
+            "data_type":                "unsigned char",
+            "size":                     384,
+            "access":                   ["getM"],
+            "mandatory":                ["getM"],
+            "announce_status_change":   false
         },
         "EPC_MAXIMUM_NUMBER_OF_HUMAN_BODY_ID": {
             "value":                    "0xE1",
+            "EDT":                      "",
+            "range":                    ["0x0001", "0x0080"],
+            "data_type":                "unsigned short",
+            "size":                     2,
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
         },
         "EPC_HUMAN_BODY_DETECTION_LOCATION_2": {
             "value":                    "0xE2",
+            "EDT":                      "",
+            "range":                    ["0x00", "0xFE"],
+            "data_type":                "unsigned char",
+            "size":                     3,
+            "access":                   ["get"],
+            "mandatory":                ["get"],
+            "announce_status_change":   false
         },
         "EPC_HUMAN_BODY_EXISTENCE_INFORMATION": {
             "value":                    "0xE3",
+            "EDT":                      "",
+            "range":                    ["0x00", "0x6F"],
+            "data_type":                "unsigned char",
+            "size":                     16,
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
         }
     },
     "CC_AIR_PRESSURE_SENSOR": {
         "EPC_AIR_PRESSURE_MEASUREMENT": {
             "value":                    "0xE0",
+            "EDT":                      "",
+            "range":                    ["0x0000", "0xFFFD"],
+            "data_type":                "unsigned short",
+            "size":                     2,
+            "unit":                     "0.1 hPa",
+            "access":                   ["get"],
+            "mandatory":                ["get"],
+            "announce_status_change":   false
         }
     },
     "CGC_AIR_CONDITIONER_RELATED": {
+        "EPC_OPERATION_MODE_SETTING":                       "0xB0",
+        "EPC_AUTOMATIC_TEMPERATURE_CONTROL_SETTING":        "0xB1",
+        "EPC_NORMAL_HIGHSPEED_SILENT_OPERATION_SETTING":    "0xB2",
+        "EPC_SET_TEMPERATURE_VALUE":                        "0xB3",
+        "EPC_SET_RELATIVE_HUMIDITY_IN_DEHUMIDIFYING_MODE":  "0xB4",
+        "EPC_SET_TEMPERATURE_IN_COOLING_MODE":              "0xB5",
+        "EPC_SET_TEMPERATURE_IN_HEATING_MODE":              "0xB6",
+        "EPC_SET_TEMPERATURE_IN_DEHUMIDIFYING_MODE":        "0xB7",
+        "EPC_RATED_POWER_CONSUMPTION":                      "0xB8",
+        "EPC_MEASURED_VALUE_OF_CURRENT_CONSUMPTION":        "0xB9",
+        "EPC_MEASURED_VALUE_OF_ROOM_RELATIVE_HUMIDITY":     "0xBA",
+        "EPC_MEASURED_VALUE_OF_ROOM_TEMPERATURE":           "0xBB",
+        "EPC_SET_TEMPERATURE_OF_USER_REMOTE_CONTROL":       "0xBC",
+        "EPC_MEASURED_COOLED_AIR_TEMPERATURE":              "0xBD",
+        "EPC_MEASURED_OUTDOOR_AIR_TEMPERATURE":             "0xBE",
+        "EPC_RELATIVE_TEMPERATURE_SETTING":                 "0xBF",
+        "EPC_AIRFLOW_RATE_SETTING":                         "0xA0",
+        "EPC_AUTOMATIC_CONTROL_AIRFLOW_DIRECTION_SETTING":  "0xA1",
+        "EPC_AUTOMATIC_SWING_AIRFLOW_SETTING":              "0xA3",
+        "EPC_AIRFLOW_DIRECTION_VERTICAL_SETTING":           "0xA4",
+        "EPC_AIRFLOW_DIRECTION_HORIZONTAL_SETTING":         "0xA5",
+        "EPC_SPECIAL_STATE":                                "0xAA",
+        "EPC_NON_PRIORITY_STATE":                           "0xAB",
+    }
         "CC_HOME_AIR_CONDITIONER": {
-            "EPC_OPERATION_POWER_SAVING":                       "0x8F",
-            "EPC_OPERATION_MODE_SETTING":                       "0xB0",
-            "EPC_AUTOMATIC_TEMPERATURE_CONTROL_SETTING":        "0xB1",
-            "EPC_NORMAL_HIGHSPEED_SILENT_OPERATION_SETTING":    "0xB2",
-            "EPC_SET_TEMPERATURE_VALUE":                        "0xB3",
-            "EPC_SET_RELATIVE_HUMIDITY_IN_DEHUMIDIFYING_MODE":  "0xB4",
-            "EPC_SET_TEMPERATURE_IN_COOLING_MODE":              "0xB5",
-            "EPC_SET_TEMPERATURE_IN_HEATING_MODE":              "0xB6",
-            "EPC_SET_TEMPERATURE_IN_DEHUMIDIFYING_MODE":        "0xB7",
-            "EPC_RATED_POWER_CONSUMPTION":                      "0xB8",
-            "EPC_MEASURED_VALUE_OF_CURRENT_CONSUMPTION":        "0xB9",
-            "EPC_MEASURED_VALUE_OF_ROOM_RELATIVE_HUMIDITY":     "0xBA",
-            "EPC_MEASURED_VALUE_OF_ROOM_TEMPERATURE":           "0xBB",
-            "EPC_SET_TEMPERATURE_OF_USER_REMOTE_CONTROL":       "0xBC",
-            "EPC_MEASURED_COOLED_AIR_TEMPERATURE":              "0xBD",
-            "EPC_MEASURED_OUTDOOR_AIR_TEMPERATURE":             "0xBE",
-            "EPC_RELATIVE_TEMPERATURE_SETTING":                 "0xBF",
-            "EPC_AIRFLOW_RATE_SETTING":                         "0xA0",
-            "EPC_AUTOMATIC_CONTROL_AIRFLOW_DIRECTION_SETTING":  "0xA1",
-            "EPC_AUTOMATIC_SWING_AIRFLOW_SETTING":              "0xA3",
-            "EPC_AIRFLOW_DIRECTION_VERTICAL_SETTING":           "0xA4",
-            "EPC_AIRFLOW_DIRECTION_HORIZONTAL_SETTING":         "0xA5",
-            "EPC_SPECIAL_STATE":                                "0xAA",
-            "EPC_NON_PRIORITY_STATE":                           "0xAB",
+            "EPC_POWER_SAVING_OPERATIONAL_SETTING":             "0x8F",
+
+
             "EPC_VENTILATION_FUNCTION_SETTING":                 "0xC0",
             "EPC_HUMIDIFIER_FUNCTION_SETTING":                  "0xC1",
             "EPC_VENTILATION_AIR_FLOW_RATE_SETTING":            "0xC2",
@@ -612,12 +901,7 @@
             "EPC_OPERATION_STATUS_OF_COMPONENTS":               "0xCD",
             "EPC_THERMOSTAT_SETTING_OVERRIDE_FUNCTION":         "0xCE",
             "EPC_AIR_PURIFICATION_MODE_SETTING":                "0xCF",
-            "EPC_ON_TIMER_BASED_RESERVATION_SETTING":           "0x90",
-            "EPC_ON_TIMER_SETTING_TIME":                        "0x91",
-            "EPC_ON_TIMER_SETTING_RELATIVE_TIME":               "0x92",
-            "EPC_OFF_TIMER_BASED_RESERVATION_SETTING":          "0x94",
-            "EPC_OFF_TIMER_SETTING_TIME":                       "0x95",
-            "EPC_OFF_TIMER_SETTING_RELATIVE_TIME":              "0x96"
+
         },
         "CC_COLD_BLASTER": {
             
