@@ -17,7 +17,7 @@
         "CC_MAILING_SENSOR": ["EPC_OPERATIONAL_STATUS", "EPC_THRESHOLD_LEVEL", "EPC_STATUS"],
         "CC_WEIGHT_SENSOR": ["EPC_OPERATIONAL_STATUS", "EPC_THRESHOLD_LEVEL", "EPC_STATUS"],
         "CC_TEMPERTURE_SENSOR": ["EPC_OPERATIONAL_STATUS", "EPC_TEMPERATURE_VALUE"],
-        "CC_HUMIDITY_SENSOR": ["EPC_OPERATIONAL_STATUS", "EPC_HUMIDITY_VALUE"],
+        "CC_HUMIDITY_SENSOR": ["EPC_OPERATIONAL_STATUS", "EPC_RELATIVE_HUMIDITY_VALUE"],
         "CC_RAIN_SENSOR": ["EPC_OPERATIONAL_STATUS", "EPC_THRESHOLD_LEVEL", "EPC_STATUS"],
         "CC_WATER_LEVEL_SENSOR": ["EPC_OPERATIONAL_STATUS", "EPC_THRESHOLD_LEVEL", "EPC_STATUS", "EPC_WATER_LEVEL_VALUE"],
         "CC_BATH_WATER_LEVEL_SENSOR": ["EPC_THRESHOLD_LEVEL", "EPC_STATUS", "EPC_BATH_WATER_LEVEL_VALUE"],
@@ -34,7 +34,7 @@
         "CC_ODOR_SENSOR": ["EPC_OPERATIONAL_STATUS", "EPC_THRESHOLD_LEVEL", "EPC_STATUS", "EPC_ODOR_VALUE"],
         "CC_FLAME_SENSOR": ["EPC_OPERATIONAL_STATUS", "EPC_THRESHOLD_LEVEL", "EPC_STATUS", "EPC_STATUS_RESET"],
         "CC_ELECTRIC_ENERGY_SENSOR": ["EPC_OPERATIONAL_STATUS", "EPC_CUMULATIVE_AMOUNT_ELECTRIC_ENERGY", "EPC_MEDIUM_CAPACITY_SENSOR_INSTANTANEOUS_ELECTRIC_ENERGY", "EPC_SMALL_CAPACITY_SENSOR_INSTATANEOUS_ELECTRIC_ENERGY", "EPC_LARGE_CAPACITY_SENSOR_INSTATANEOUS_ELECTRIC_ENERGY", "EPC_CUMULATIVE_AMOUNT_ELECTRIC_ENERGY_MEASUREMENT_LOG", "EPC_EFFECTIVE_VOLTAGE_VALUE"],
-        "CC_CURRENT_VALUE_SENSOR": ["EPC_OPERATIONAL_STATUS", "EPC_CURRENT_VALUE_1", "EPC_RATED_VOLTAGE_TO_BE_MEASURED", "EPC_CURRENT_VALUE_2"],
+        "CC_CURRENT_VALUE_SENSOR": ["EPC_OPERATIONAL_STATUS", "EPC_CURRENT_VALUE_1", "EPC_RATED_VOLTAGE_VALUE", "EPC_CURRENT_VALUE_2"],
         "CC_DAYLIGHT_SENSOR": ["EPC_OPERATIONAL_STATUS"],
         "CC_WATER_FLOW_RATE_SENSOR": ["EPC_OPERATIONAL_STATUS", "EPC_CUMULATIVE_FLOW_RATE", "EPC_FLOW_RATE"],
         "CC_MICROMOTION_SENSOR": ["EPC_OPERATIONAL_STATUS", "EPC_THRESHOLD_LEVEL", "EPC_STATUS", "EPC_DETECTION_COUNTER", "EPC_SAMPLING_COUNT", "EPC_SAMPLING_CYCLE"],
@@ -47,468 +47,417 @@
         "CC_AIR_PRESSURE_SENSOR": ["EPC_OPERATIONAL_STATUS", "EPC_AIR_PRESSURE_MEASUREMENT"]
     },
     "CGC_AIR_CONDITIONER_RELATED": {
-        "CC_HOME_AIR_CONDITIONER": {
-            "EPC_POWER_SAVING_OPERATIONAL_SETTING":             "0x8F",
-            "EPC_OPERATION_MODE_SETTING":                       "0xB0",
-            "EPC_AUTOMATIC_TEMPERATURE_CONTROL_SETTING":        "0xB1",
-            "EPC_NORMAL_HIGHSPEED_SILENT_OPERATION_SETTING":    "0xB2",
-            "EPC_SET_TEMPERATURE_VALUE":                        "0xB3",
-            "EPC_SET_RELATIVE_HUMIDITY_IN_DEHUMIDIFYING_MODE":  "0xB4",
-            "EPC_SET_TEMPERATURE_IN_COOLING_MODE":              "0xB5",
-            "EPC_SET_TEMPERATURE_IN_HEATING_MODE":              "0xB6",
-            "EPC_SET_TEMPERATURE_IN_DEHUMIDIFYING_MODE":        "0xB7",
-            "EPC_RATED_POWER_CONSUMPTION":                      "0xB8",
-            "EPC_MEASURED_VALUE_OF_CURRENT_CONSUMPTION":        "0xB9",
-            "EPC_MEASURED_VALUE_OF_ROOM_RELATIVE_HUMIDITY":     "0xBA",
-            "EPC_MEASURED_VALUE_OF_ROOM_TEMPERATURE":           "0xBB",
-            "EPC_SET_TEMPERATURE_OF_USER_REMOTE_CONTROL":       "0xBC",
-            "EPC_MEASURED_COOLED_AIR_TEMPERATURE":              "0xBD",
-            "EPC_MEASURED_OUTDOOR_AIR_TEMPERATURE":             "0xBE",
-            "EPC_RELATIVE_TEMPERATURE_SETTING":                 "0xBF",
-            "EPC_AIRFLOW_RATE_SETTING":                         "0xA0",
-            "EPC_AUTOMATIC_CONTROL_AIRFLOW_DIRECTION_SETTING":  "0xA1",
-            "EPC_AUTOMATIC_SWING_AIRFLOW_SETTING":              "0xA3",
-            "EPC_AIRFLOW_DIRECTION_VERTICAL_SETTING":           "0xA4",
-            "EPC_AIRFLOW_DIRECTION_HORIZONTAL_SETTING":         "0xA5",
-            "EPC_SPECIAL_STATE":                                "0xAA",
-            "EPC_NON_PRIORITY_STATE":                           "0xAB",
-            "EPC_VENTILATION_FUNCTION_SETTING":                 "0xC0",
-            "EPC_HUMIDIFIER_FUNCTION_SETTING":                  "0xC1",
-            "EPC_VENTILATION_AIR_FLOW_RATE_SETTING":            "0xC2",
-            "EPC_DEGREE_OF_HUMIDIFICATION_SETTING":             "0xC4",
-            "EPC_MOUNTED_AIR_CLEANING_METHOD":                  "0xC6",
-            "EPC_AIR_PURIFIER_FUNCTION_SETTING":                "0xC7",
-            "EPC_MOUNTED_AIR_REFRESH_METHOD":                   "0xC8",
-            "EPC_AIR_REFRESHER_FUNCTION_SETTING":               "0xC9",
-            "EPC_MOUNTED_SELF_CLEANING_METHOD":                 "0xCA",
-            "EPC_SELF_CLEANING_FUNCTION_SETTING":               "0xCB",
-            "EPC_SPECIAL_FUNCTION_SETTING":                     "0xCC",
-            "EPC_OPERATION_STATUS_OF_COMPONENTS":               "0xCD",
-            "EPC_THERMOSTAT_SETTING_OVERRIDE_FUNCTION":         "0xCE",
-            "EPC_AIR_PURIFICATION_MODE_SETTING":                "0xCF",
-            "EPC_ON_TIMER_BASED_RESERVATION_SETTING":           "0x90",
-            "EPC_ON_TIMER_SETTING_TIME":                        "0x91",
-            "EPC_ON_TIMER_SETTING_RELATIVE_TIME":               "0x92",
-            "EPC_OFF_TIMER_BASED_RESERVATION_SETTING":          "0x94",
-            "EPC_OFF_TIMER_SETTING_TIME":                       "0x95",
-            "EPC_OFF_TIMER_SETTING_RELATIVE_TIME":              "0x96"
-        },
-        "CC_COLD_BLASTER": {
+        "CC_HOME_AIR_CONDITIONER": ["EPC_OPERATIONAL_STATUS", "EPC_POWER_SAVING_OPERATIONAL_SETTING", "EPC_OPERATION_MODE_SETTING", "EPC_AUTOMATIC_TEMPERATURE_CONTROL_SETTING", "EPC_NORMAL_HIGHSPEED_SILENT_OPERATION_SETTING", "EPC_TEMPERATURE_VALUE_SETTING", "EPC_RELATIVE_HUMIDITY_VALUE_SETTING", "EPC_TEMPERATURE_VALUE_COOLING_MODE_SETTING", "EPC_TEMPERATURE_VALUE_HEATING_MODE_SETTING", "EPC_TEMPERATURE_VALUE_DEHUMIDIFYING_MODE_SETTING", "EPC_RATED_POWER_CONSUMPTION", "EPC_CURRENT_CONSUMPTION_VALUE", "EPC_RELATIVE_HUMIDITY_VALUE", "EPC_ROOM_TEMPERATURE_VALUE", "EPC_TEMPERATURE_VALUE_SETTING_USER_REMOTE_CONTROL", "EPC_COOLED_AIR_TEMPERATURE_VALUE", "EPC_OUTDOOR_AIR_TEMPERATURE_VALUE", "EPC_RELATIVE_TEMPERATURE_SETTING", "EPC_AIRFLOW_RATE_SETTING", "EPC_AUTOMATIC_CONTROL_AIRFLOW_DIRECTION_SETTING", "EPC_AUTOMATIC_SWING_AIRFLOW_SETTING", "EPC_AIRFLOW_DIRECTION_VERTICAL_SETTING", "EPC_AIRFLOW_DIRECTION_HORIZONTAL_SETTING", "EPC_SPECIAL_STATE", "EPC_NON_PRIORITY_STATE", "EPC_VENTILATION_FUNCTION_SETTING", "EPC_HUMIDIFIER_FUNCTION_SETTING", "EPC_VENTILATION_AIR_FLOW_RATE_SETTING", "EPC_DEGREE_OF_HUMIDIFICATION_SETTING", "EPC_MOUNTED_AIR_CLEANING_METHOD", "EPC_AIR_PURIFIER_FUNCTION_SETTING", "EPC_MOUNTED_AIR_REFRESH_METHOD", "EPC_AIR_REFRESHER_FUNCTION_SETTING", "EPC_MOUNTED_SELF_CLEANING_METHOD", "EPC_SELF_CLEANING_FUNCTION_SETTING", "EPC_SPECIAL_FUNCTION_SETTING", "EPC_OPERATION_STATUS_OF_COMPONENTS", "EPC_THERMOSTAT_SETTING_OVERRIDE_FUNCTION", "EPC_AIR_PURIFICATION_MODE_SETTING", "EPC_BUZZER", "EPC_ON_TIMER_BASED_RESERVATION_SETTING", "EPC_ON_TIMER_SETTING_TIME", "EPC_ON_TIMER_SETTING_RELATIVE_TIME", "EPC_OFF_TIMER_BASED_RESERVATION_SETTING", "EPC_OFF_TIMER_SETTING_TIME", "EPC_OFF_TIMER_SETTING_RELATIVE_TIME"
+        ],
+        "CC_COLD_BLASTER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_ELECTRIC_FAN": {
+        ],
+        "CC_ELECTRIC_FAN": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_VENTILATION_FAN": {
-            "EPC_SET_ROOM_RELATIVE_HUMIDITY_VALUE":             "0xB4"
-        },
-        "CC_AIR_CONDITIONER_VENTILATION_FAN": {
+        ],
+        "CC_VENTILATION_FAN": ["EPC_OPERATIONAL_STATUS"
+        
+        ],
+        "CC_AIR_CONDITIONER_VENTILATION_FAN": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_AIR_CLEANER": {
+        ],
+        "CC_AIR_CLEANER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_COLD_BLAST_FAN": {
+        ],
+        "CC_COLD_BLAST_FAN": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_CIRCULATOR": {
+        ],
+        "CC_CIRCULATOR": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_DEHUMIDIFIER": {
+        ],
+        "CC_DEHUMIDIFIER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_HUMIDIFIER": {
+        ],
+        "CC_HUMIDIFIER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_CEILING_FAN": {
+        ],
+        "CC_CEILING_FAN": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_ELECTRIC_KOTATSU": {
+        ],
+        "CC_ELECTRIC_KOTATSU": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_ELECTRIC_HEATING_PAD": {
+        ],
+        "CC_ELECTRIC_HEATING_PAD": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_ELECTRIC_BLANKET": {
+        ],
+        "CC_ELECTRIC_BLANKET": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_SPACE_HEATER": {
+        ],
+        "CC_SPACE_HEATER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_PANEL_HEATER": {
+        ],
+        "CC_PANEL_HEATER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_ELECTRIC_CARPET": {
+        ],
+        "CC_ELECTRIC_CARPET": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_FLOOR_HEATER_0x01": {
+        ],
+        "CC_FLOOR_HEATER_0x01": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_ELECTRIC_HEATER": {
+        ],
+        "CC_ELECTRIC_HEATER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_FAN_HEATER": {
+        ],
+        "CC_FAN_HEATER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_BATTERY_CHARGER": {
+        ],
+        "CC_BATTERY_CHARGER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_PACKAGE_TYPE_COMMERCIAL_AIRCOND_INDOOR": {
+        ],
+        "CC_PACKAGE_TYPE_COMMERCIAL_AIRCOND_INDOOR": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_PACKAGE_TYPE_COMMERCIAL_AIRCOND_OUTDOOR": {
+        ],
+        "CC_PACKAGE_TYPE_COMMERCIAL_AIRCOND_OUTDOOR": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_PACKAGE_TYPE_COMMERCIAL_AIRCOND_THERMAL": {
+        ],
+        "CC_PACKAGE_TYPE_COMMERCIAL_AIRCOND_THERMAL": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_COMMERCIAL_FAN_COIL_UNIT": {
+        ],
+        "CC_COMMERCIAL_FAN_COIL_UNIT": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_COMMERCIAL_AIRCOND_COLD_SOURCE_CHILLER": {
+        ],
+        "CC_COMMERCIAL_AIRCOND_COLD_SOURCE_CHILLER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_COMMERCIAL_AIRCOND_HOT_SOURCE_BOILER": {
+        ],
+        "CC_COMMERCIAL_AIRCOND_HOT_SOURCE_BOILER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_AIRCOND_VAV_FOR_COMMERCIAL_APPLICATIONS": {
+        ],
+        "CC_AIRCOND_VAV_FOR_COMMERCIAL_APPLICATIONS": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_AIRCOND_FOR_COMMERCIAL_APPLICATIONS": {
+        ],
+        "CC_AIRCOND_FOR_COMMERCIAL_APPLICATIONS": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_UNIT_COOLER": {
+        ],
+        "CC_UNIT_COOLER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_CONDENSING_UNIT_FOR_COMMERCIAL_APP": {
+        ],
+        "CC_CONDENSING_UNIT_FOR_COMMERCIAL_APP": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_ELECTRIC_STORAGE_HEATER": {
+        ],
+        "CC_ELECTRIC_STORAGE_HEATER": ["EPC_OPERATIONAL_STATUS"
             
-        }
+        ]
         
     },
     "CGC_HOUSING_RELATED": {
-        "CC_ELECTRICALLY_OPERATED_BLIND": {
+        "CC_ELECTRICALLY_OPERATED_BLIND": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_ELECTRICALLY_OPERATED_SHUTTER": {
+        ],
+        "CC_ELECTRICALLY_OPERATED_SHUTTER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_ELECTRICALLY_OPERATED_CURTAIN": {
+        ],
+        "CC_ELECTRICALLY_OPERATED_CURTAIN": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_ELECTRICALLY_OPERATED_RAIN_SLIDING_DOOR": {
+        ],
+        "CC_ELECTRICALLY_OPERATED_RAIN_SLIDING_DOOR": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_ELECTRICALLY_OPERATED_GATE": {
+        ],
+        "CC_ELECTRICALLY_OPERATED_GATE": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_ELECTRICALLY_OPERATED_WINDOW": {
+        ],
+        "CC_ELECTRICALLY_OPERATED_WINDOW": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_AUTOMATICALLY_OPERATED_ENTRANCE_DOOR": {
+        ],
+        "CC_AUTOMATICALLY_OPERATED_ENTRANCE_DOOR": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_GARDEN_SPRINKLER": {
+        ],
+        "CC_GARDEN_SPRINKLER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_FIRE_SPRINKLER": {
+        ],
+        "CC_FIRE_SPRINKLER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_FOUNTAIN": {
+        ],
+        "CC_FOUNTAIN": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_INSTANTANEOUS_WATER_HEATER": {
+        ],
+        "CC_INSTANTANEOUS_WATER_HEATER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_ELECTRIC_WATER_HEATER": {
+        ],
+        "CC_ELECTRIC_WATER_HEATER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_SOLAR_WATER_HEATER": {
+        ],
+        "CC_SOLAR_WATER_HEATER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_CIRCULATION_PUMP": {
+        ],
+        "CC_CIRCULATION_PUMP": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_BIDET_EQUIPPED_TOILET": {
+        ],
+        "CC_BIDET_EQUIPPED_TOILET": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_ELECTRIC_LOCK": {
+        ],
+        "CC_ELECTRIC_LOCK": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_GAS_LINE_VALVE": {
+        ],
+        "CC_GAS_LINE_VALVE": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_HOME_SAUNA": {
+        ],
+        "CC_HOME_SAUNA": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_HOT_WATER_GENERATOR": {
+        ],
+        "CC_HOT_WATER_GENERATOR": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_BATHROOM_DRYER": {
+        ],
+        "CC_BATHROOM_DRYER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_HOME_ELEVATOR": {
+        ],
+        "CC_HOME_ELEVATOR": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_ELECTRICALLY_OPERATED_ROOM_DIVIDER": {
+        ],
+        "CC_ELECTRICALLY_OPERATED_ROOM_DIVIDER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_HORIZONTAL_TRANSFER": {
+        ],
+        "CC_HORIZONTAL_TRANSFER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_ELECTRICALLY_OPERATED_CLOTH_DRYING_POLE": {
+        ],
+        "CC_ELECTRICALLY_OPERATED_CLOTH_DRYING_POLE": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_SEPTIC_TANK": {
+        ],
+        "CC_SEPTIC_TANK": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_HOME_SOLAR_POWER_GENERATION": {
+        ],
+        "CC_HOME_SOLAR_POWER_GENERATION": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_COLD_HOT_WATER_HEAT_SOURCE_EQUIPMENT": {
+        ],
+        "CC_COLD_HOT_WATER_HEAT_SOURCE_EQUIPMENT": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_FLOOR_HEATER_0x02": {
+        ],
+        "CC_FLOOR_HEATER_0x02": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_FUEL_CELL": {
+        ],
+        "CC_FUEL_CELL": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_STORAGE_BATTERY": {
+        ],
+        "CC_STORAGE_BATTERY": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_ELECTRIC_VEHICLE_CHARGER_DISCHARGER": {
+        ],
+        "CC_ELECTRIC_VEHICLE_CHARGER_DISCHARGER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_ENGINE_COGENERATION": {
+        ],
+        "CC_ENGINE_COGENERATION": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_ELECTRIC_ENERGY_METER": {
+        ],
+        "CC_ELECTRIC_ENERGY_METER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_WATER_FLOW_METER": {
+        ],
+        "CC_WATER_FLOW_METER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_GAS_METER": {
+        ],
+        "CC_GAS_METER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_LP_GAS_METER": {
+        ],
+        "CC_LP_GAS_METER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_CLOCK": {
+        ],
+        "CC_CLOCK": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_AUTOMATIC_DOOR": {
+        ],
+        "CC_AUTOMATIC_DOOR": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_COMMERCIAL_ELEVATOR": {
+        ],
+        "CC_COMMERCIAL_ELEVATOR": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_DISTRIBUTION_PANEL_METERING": {
+        ],
+        "CC_DISTRIBUTION_PANEL_METERING": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_LOW_VOLTAGE_SMART_ELECTRIC_ENERGY_METER": {
+        ],
+        "CC_LOW_VOLTAGE_SMART_ELECTRIC_ENERGY_METER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_SMART_GAS_METER": {
+        ],
+        "CC_SMART_GAS_METER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_HIGH_VOLTAGE_SMART_ELECTRIC_ENERGY_METER": {
+        ],
+        "CC_HIGH_VOLTAGE_SMART_ELECTRIC_ENERGY_METER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_GENERAL_LIGHTING_CLASS": {
+        ],
+        "CC_GENERAL_LIGHTING_CLASS": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_SINGLE_FUNCTION_LIGHTING": {
+        ],
+        "CC_SINGLE_FUNCTION_LIGHTING": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_EMERGENCY_LIGHTING": {
+        ],
+        "CC_EMERGENCY_LIGHTING": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_EQUIPMENT_LIGHT": {
+        ],
+        "CC_EQUIPMENT_LIGHT": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_BUZZER": {
+        ],
+        "CC_BUZZER": ["EPC_OPERATIONAL_STATUS"
             
-        }
+        ]
     },
     "CGC_COOKING_RELATED": {
-        "CC_COFFEE_MACHINE": {
+        "CC_COFFEE_MACHINE": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_COFFEE_MILL": {
+        ],
+        "CC_COFFEE_MILL": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_ELECTRIC_HOT_WATER_POT": {
+        ],
+        "CC_ELECTRIC_HOT_WATER_POT": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_ELECTRIC_STOVE": {
+        ],
+        "CC_ELECTRIC_STOVE": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_TOASTER": {
+        ],
+        "CC_TOASTER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_JUICER_FOOD_MIXER": {
+        ],
+        "CC_JUICER_FOOD_MIXER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_FOOD_PROCESSOR": {
+        ],
+        "CC_FOOD_PROCESSOR": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_REFRIGERATOR": {
+        ],
+        "CC_REFRIGERATOR": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_COMBINATION_MICROWAVE_OVEN": {
+        ],
+        "CC_COMBINATION_MICROWAVE_OVEN": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_COOKING_HEATER": {
+        ],
+        "CC_COOKING_HEATER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_OVEN": {
+        ],
+        "CC_OVEN": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_RICE_COOKER": {
+        ],
+        "CC_RICE_COOKER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_ELECTRONIC_JAR": {
+        ],
+        "CC_ELECTRONIC_JAR": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_DISH_WASHER": {
+        ],
+        "CC_DISH_WASHER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_DISH_DRYER": {
+        ],
+        "CC_DISH_DRYER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_ELECTRIC_RICE_CARD_COOKER": {
+        ],
+        "CC_ELECTRIC_RICE_CARD_COOKER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_KEEP_WARM_MACHINE": {
+        ],
+        "CC_KEEP_WARM_MACHINE": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_RICE_MILL": {
+        ],
+        "CC_RICE_MILL": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_AUTOMATIC_BREAD_COOKER": {
+        ],
+        "CC_AUTOMATIC_BREAD_COOKER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_SLOW_COOKER": {
+        ],
+        "CC_SLOW_COOKER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_ELECTRIC_PICKLES_COOKER": {
+        ],
+        "CC_ELECTRIC_PICKLES_COOKER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_WASHING_MACHINE": {
+        ],
+        "CC_WASHING_MACHINE": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_CLOTHES_DRYER": {
+        ],
+        "CC_CLOTHES_DRYER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_ELECTRIC_IRON": {
+        ],
+        "CC_ELECTRIC_IRON": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_TROUSER_PRESS": {
+        ],
+        "CC_TROUSER_PRESS": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_FUTON_DRYER": {
+        ],
+        "CC_FUTON_DRYER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_SMALL_ARTICLE_SHOES_DRYER": {
+        ],
+        "CC_SMALL_ARTICLE_SHOES_DRYER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_ELECTRIC_VACUUM_CLEANER": {
+        ],
+        "CC_ELECTRIC_VACUUM_CLEANER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_DISPOSER": {
+        ],
+        "CC_DISPOSER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_ELECTRIC_MOSQUITO_CATCHER": {
+        ],
+        "CC_ELECTRIC_MOSQUITO_CATCHER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_COMMERCIAL_SHOW_CASE": {
+        ],
+        "CC_COMMERCIAL_SHOW_CASE": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_COMMERCIAL_REFRIGERATOR": {
+        ],
+        "CC_COMMERCIAL_REFRIGERATOR": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_COMMERCIAL_HOT_CASE": {
+        ],
+        "CC_COMMERCIAL_HOT_CASE": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_COMMERCIAL_FRYER": {
+        ],
+        "CC_COMMERCIAL_FRYER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_COMMERCIAL_MICROWAVE_OVEN": {
+        ],
+        "CC_COMMERCIAL_MICROWAVE_OVEN": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_WASHER_AND_DRYER": {
+        ],
+        "CC_WASHER_AND_DRYER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_COMMERCIAL_SHOW_CASE_OUTDOOR_UNIT": {
+        ],
+        "CC_COMMERCIAL_SHOW_CASE_OUTDOOR_UNIT": ["EPC_OPERATIONAL_STATUS"
             
-        }
+        ]
     },
     "CGC_HEALTH_RELATED": {
-        "CC_WEIGHTING_MACHINE": {
+        "CC_WEIGHTING_MACHINE": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_CLINICAL_THERMOMETER": {
+        ],
+        "CC_CLINICAL_THERMOMETER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_BLOOD_PRESSURE_METER": {
+        ],
+        "CC_BLOOD_PRESSURE_METER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_BLOOD_SUGAR_METER": {
+        ],
+        "CC_BLOOD_SUGAR_METER": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_BODY_FAT_METER": {
+        ],
+        "CC_BODY_FAT_METER": ["EPC_OPERATIONAL_STATUS"
             
-        }
+        ]
     },
     "CGC_MANAGEMENT_RELATED": {
-        "CC_SECURE_COMM_SHARED_KEY_SETUP_NODE": {
+        "CC_SECURE_COMM_SHARED_KEY_SETUP_NODE": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_SWITCH": {
+        ],
+        "CC_SWITCH": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_PORTABLE_TERMINAL": {
+        ],
+        "CC_PORTABLE_TERMINAL": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_CONTROLLER": {
+        ],
+        "CC_CONTROLLER": ["EPC_OPERATIONAL_STATUS"
             
-        }
+        ]
     },
     "CGC_AV_RELATED": {
-        "CC_DISPLAY": {
+        "CC_DISPLAY": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_TELEVISION": {
+        ],
+        "CC_TELEVISION": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_AUDIO": {
+        ],
+        "CC_AUDIO": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "CC_NETWORK_CAMERA": {
+        ],
+        "CC_NETWORK_CAMERA": ["EPC_OPERATIONAL_STATUS"
             
-        }
+        ]
     },
     "CGC_PROFILE_CLASS": {
-        "CC_NODE_PROFILE": {
-            "EPC_UNIQUE_IDENTIFIER_DATA":           "0xBF",
-            "EPC_NUMBER_OF_SELF_NODE_INSTANCES":    "0xD3",
-            "EPC_NUMBER_OF_SELF_NODE_CLASSES":      "0xD4",
-            "EPC_INSTANCE_LIST_NOTIFICATION":       "0xD5",
-            "EPC_SELF_NODE_INSTANCE_LIST_S":        "0xD6",
-            "EPC_SELF_NODE_CLASS_LIST_S":           "0xD7"
-        }
+        "CC_NODE_PROFILE": ["EPC_OPERATIONAL_STATUS", "EPC_UNIQUE_IDENTIFIER_DATA", "EPC_NUMBER_OF_SELF_NODE_INSTANCES", "EPC_NUMBER_OF_SELF_NODE_CLASSES", "EPC_INSTANCE_LIST_NOTIFICATION", "EPC_SELF_NODE_INSTANCE_LIST_S", "EPC_SELF_NODE_CLASS_LIST_S"]
     },
     "CGC_USER_DEFINITION_CLASS": {
-        "IC_GENERAL_NODE": {
+        "IC_GENERAL_NODE": ["EPC_OPERATIONAL_STATUS"
             
-        },
-        "IC_TRANSMISSION_ONLY_NODE": {
+        ],
+        "IC_TRANSMISSION_ONLY_NODE": ["EPC_OPERATIONAL_STATUS"
             
-        }
+        ]
     }
 }
 
