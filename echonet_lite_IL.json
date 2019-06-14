@@ -1,0 +1,20 @@
+{
+    "IL_LIVING_ROOM":                           "0b00001000",
+    "IL_DINING_ROOM":                           "0b00010000",
+    "IL_KITCHEN":                               "0b00011000",
+    "IL_BATHROOM":                              "0b00100000",
+    "IL_LAVATORY":                              "0b00101000",
+    "IL_CHANGING_ROOM":                         "0b00110000",
+    "IL_PASSAGEWAY":                            "0b00111000",
+    "IL_ROOM":                                  "0b01000000",
+    "IL_STAIRWAY":                              "0b01001000",
+    "IL_FRONT_DOOR":                            "0b01010000",
+    "IL_STORE_ROOM":                            "0b01011000",
+    "IL_GARDEN":                                "0b01100000",
+    "IL_GARAGE":                                "0b01101000",
+    "IL_BALCONY":                               "0b01110000",
+    "IL_OTHERS":                                "0b01111000",
+    "IL_INSTALLATION_LOCATION_NOT_SPECIFIED":   "0b00000000",
+    "IL_INSTALLATION_LOCATION_INDEFINITE":      "0b11111111",
+    "IL_POSITION_INFORMATION":                  "0b00000001"
+}
