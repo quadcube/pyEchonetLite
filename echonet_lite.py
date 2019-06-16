@@ -3,17 +3,47 @@
 #
 import logging
 import unittest
+import json
+
+const = None
 
 """
     Echonet Lite Functions
     Note: 1. functions are similar to the C version Echonet Lite library, removed some of the simpler functions such as echonet_setEHD1(), etc. and changed the return failed response to -1 for get() functions
           2. functions that deals directly with echonet_packet (global variable) must be executed in sequence (e.g.: setPacket -> setnEPC -> setnPDC -> setnEDT)
           3. functions are thread safe as long as functions in each instances (classes) are sequentially called
+    
+    Echonet Lite Packet Structure
+    |   EHD1   |   EHD2   |   TID   |   EDATA (SEOJ,DEOJ,ESV,OPC,EPC1,PDC1,EDT1,...)   |
 """
 class EchonetLite:
     def __init__(self):
         MAX_ECHONET_PACKET_LEN = 64
         self.echonet_packet = [0] * MAX_ECHONET_PACKET_LEN # pre-allocate echonet lite packet structure
+    
+    # Initialize Echonet Lite Library
+    # Note: 1. Require JSON Echonet Lite property files
+    def initEchonetLite(self):
+        try:
+            with open('json/echonet_lite_EHD.json') as json_file:
+                ehd = json.load(json_file)
+            with open('json/echonet_lite_EOJ_CGC.json') as json_file:
+                eoj_cgc = json.load(json_file)
+            with open('json/echonet_lite_EOJ_CC.json') as json_file:
+                eoj_cc = json.load(json_file)
+            with open('json/echonet_lite_ESV.json') as json_file:
+                esv = json.load(json_file)
+            with open('json/echonet_lite_EPC.json') as json_file:
+                epc = json.load(json_file)
+            with open('json/echonet_lite_EPC_EDT.json') as json_file:
+                epc_edt = json.load(json_file)
+            with open('json/echonet_lite_IL.json') as json_file:
+                il = json.load(json_file)
+            with open('json/echonet_lite_FD.json') as json_file:
+                fd = json.load(json_file)
+
+        except Exception as e:
+            logging.exception("initEchonetLite() exception occurred.")
     
     # Set Echonet Lite Property
     # Note: 1. 1 byte (X1-class group code,X2-class code)
