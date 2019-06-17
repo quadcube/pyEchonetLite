@@ -16,7 +16,7 @@
         "CC_SOUND_SENSOR":                  "0x0E",
         "CC_MAILING_SENSOR":                "0x0F",
         "CC_WEIGHT_SENSOR":                 "0x10",
-        "CC_TEMPERTURE_SENSOR":             "0x11",
+        "CC_TEMPERATURE_SENSOR":            "0x11",
         "CC_HUMIDITY_SENSOR":               "0x12",
         "CC_RAIN_SENSOR":                   "0x13",
         "CC_WATER_LEVEL_SENSOR":            "0x14",
