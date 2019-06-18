@@ -469,7 +469,7 @@
             "announce_status_change":   false
         }
     },
-    "CC_TEMPERTURE_SENSOR": {
+    "CC_TEMPERATURE_SENSOR": {
         "EPC_TEMPERATURE_VALUE": {
             "value":                    "0xE0",
             "EDT":                      "",

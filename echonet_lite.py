@@ -39,7 +39,6 @@ class EchonetLite:
             with open('json/echonet_lite_EHD.json') as json_file:
                 ehd = json.load(json_file)
                 ehd = self.dictTraverse(ehd, path=None, convert="Hex")
-                print(ehd)
             with open('json/echonet_lite_EOJ_CGC.json') as json_file:
                 eoj_cgc = json.load(json_file)
                 eoj_cgc = self.dictTraverse(eoj_cgc, convert="Hex")
@@ -65,24 +64,64 @@ class EchonetLite:
             logging.exception("initEchonetLite() exception occurred.")
 
     # Helper: Python Dictionary Traversal
-    def dictTraverse(self, obj, path=None, convert=None, callback=None):
-        if path is None:
-            path = []
-        if isinstance(obj, dict):
-            value = {k: self.dictTraverse(v, path + [k], convert, callback) for k, v in obj.items()}
-        elif isinstance(obj, list):
-            value = [self.dictTraverse(elem, path + [[]], convert, callback) for elem in obj]
-        else:
-            value = obj
-        if convert == "Hex":
+    # Note: 1.
+    #       2.
+    def dictTraverse(self, obj, path=None, callback=None, convert=None, search=None):
+        search_value = None
+        # Dictionary Traversal (recursive function)
+        def _inner_traversal(obj, path=None, callback=None, convert=None, search=None, target=None):
+            nonlocal search_value
+            if path is None:
+                path = []
+            if isinstance(obj, dict):
+                value = {} #value = {k: self.dictTraverse(v, path + [k], callback, convert, search) for k, v in obj.items()}
+                for k, v in obj.items():
+                    #print(f"dict() path {path}, key {k}, value {v}\n\n")
+                    if search is not None: # search for value
+                        if all(elem in path for elem in search) and k == target:
+                            search_value = v
+                            raise StopIteration # break all iteration
+                    value.update({k: _inner_traversal(v, path + [k], callback, convert, search, target)})
+                    #print(f"dict() path {path} value {value}\n\n")
+            elif isinstance(obj, list):
+                value = [] #value = [self.dictTraverse(elem, path + [[]], callback, convert, search) for elem in obj]
+                for elem in obj:
+                    #print(f"list() path {path}, elem {elem}\n\n")
+                    value.append(_inner_traversal(elem, path + [[]], callback, convert, search, target))
+                    #print(f"list() path {path} value {value}\n\n")
+            else:
+                #print(f"scalar path {path} value {obj}\n\n")
+                if search is not None: # search for value
+                    if all(elem in path for elem in search):
+                        search_value = obj
+                        raise StopIteration # break all iteration
+                value = obj
+            if convert == "Hex": # convert dict hex strings to int
+                try:
+                    value = int(value,0)
+                except:
+                    pass
+            if callback is None:
+                return value
+            else:
+                return callback(path, value)
+                
+        if search is not None:
             try:
-                value = int(value,0)
-            except:
-                pass
-        if callback is None:
-            return value
+                if not isinstance(search, list): # make sure that search variable is a list
+                    search = [search]
+                target = [elem for elem in search if not any(elem1 in elem for elem1 in ['CGC_', 'CC_', 'EPC_'])] # filter off some Echonet Lite constant headers
+                target = 'value' if not target else target[0] # provide default target and ensure it's a single target
+                search_only = [elem for elem in search if any(elem1 in elem for elem1 in ['CGC_', 'CC_', 'EPC_'])] # filter off some Echonet Lite constant
+                if not search_only: search_only = search # ensure search is not empty
+                _inner_traversal(obj, path, callback, convert, search_only, target)
+            except StopIteration:
+                return search_value
         else:
-            return callback(path, value)
+            return _inner_traversal(obj, path, callback, convert)
+                
+    # Helper: Echonet Lite Property Finder
+    #def getEPC():
     
     # Set Echonet Lite Property
     # Note: 1. 1 byte (X1-class group code,X2-class code)
@@ -193,10 +232,13 @@ class EchonetLite:
     def setPacket(self, ehd1, ehd2, tid16, seoj_cgc, seoj_cc, seoj_ic, deoj_cgc, deoj_cc, deoj_ic, esv, opc):
         if type(tid16) is not list:
             tid16 = [tid16 >> 8, tid16 & 0x00ff]
+        self.echonet_packet[:] = [0 for _ in self.echonet_packet[:]] # reset global var
         self.echonet_packet[:12] = [ehd1, ehd2, tid16[0], tid16[1], seoj_cgc, seoj_cc, seoj_ic, deoj_cgc, deoj_cc, deoj_ic, esv, opc]
 
-# def getOperationalStatus(ip_addr, )
-
+    def getOperationalStatus(self, ip_addr, deoj_cc, deoj_ic=0x01):
+        global ehd, eoj_cgc, eoj_cc, esv, epc, epc_edt, il, fd
+        #self.setPacket(ehd['EHD1_ECHONET'], ehd['EHD2_FORMAT1'], 0xFF, eoj_cgc['CGC_PROFILE_CLASS'], eoj_cc['CGC_PROFILE_CLASS']['CC_NODE_PROFILE'], 0x01, eoj_cgc[], eoj_cc[]['CC_TEMPERATURE_SENSOR'], deoj_ic, esv['ESV_Get'], 1)
+        #self.setnEPC(1, )
 
 """
     Echonet Lite Function Test Units
@@ -290,16 +332,15 @@ class testEchonetLite(unittest.TestCase):
         self.assertEqual(self.obj.echonet_packet[:len(self.sample)], self.sample)
 
     def test_initEchonetLite_setPacket(self):
-        #global ehd, eoj_cgc, eoj_cc, esv, epc, epc_edt, il, fd
         self.sample = [0x10, 0x81, 0x00, 0xFF, 0x0E, 0xF0, 0x01, 0x00, 0x11, 0x01, 0x62, 3]
         self.obj.setPacket(ehd['EHD1_ECHONET'], ehd['EHD2_FORMAT1'], 0xFF, eoj_cgc['CGC_PROFILE_CLASS'], eoj_cc['CGC_PROFILE_CLASS']['CC_NODE_PROFILE'], 0x01, eoj_cgc['CGC_SENSOR_RELATED'], eoj_cc['CGC_SENSOR_RELATED']['CC_TEMPERATURE_SENSOR'], 0x01, esv['ESV_Get'], 3)
         self.assertEqual(self.obj.echonet_packet[:len(self.sample)], self.sample)
 
-
-
-
-
-
+    def test_dictTraverse(self):
+        self.assertEqual(self.obj.dictTraverse(epc_edt, search=["CC_TEMPERATURE_SENSOR"]), 0xE0)
+        self.assertEqual(self.obj.dictTraverse(epc_edt, search=["CC_ELECTRIC_ENERGY_SENSOR", "EPC_SMALL_CAPACITY_SENSOR_INSTATANEOUS_ELECTRIC_ENERGY"]), 0xE2)
+        self.assertEqual(self.obj.dictTraverse(eoj_cc, search="CC_ELECTRIC_ENERGY_SENSOR"), 0x22) # test non-'value' key dict
+        self.assertEqual(self.obj.dictTraverse(ehd, search="EHD2_FORMAT1"), 0x81) # test single level dict without Echonet Lite constant header
 
 
 
