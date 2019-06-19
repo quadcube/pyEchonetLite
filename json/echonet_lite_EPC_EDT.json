@@ -653,7 +653,6 @@
             "access":                   ["get"],
             "mandatory":                [],
             "announce_status_change":   false
-            
         },
         "EPC_CUMULATIVE_AMOUNT_ELECTRIC_ENERGY_MEASUREMENT_LOG": {
             "value":                    "0xE4",
