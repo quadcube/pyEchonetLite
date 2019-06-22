@@ -1,5 +1,7 @@
 # pyEchonetLite: Echonet Lite for Human
-Too lazy to search specification documents for Class Group Code, source EOJ, ESV, etc.? Written in Python 3, require no external dependencies, pure Python!
+Too lazy to search specification documents for mundane stuffs like Class Group Code, source EOJ, ESV, etc.? 
+pyEchonetLite was created to make interfacing with Echonet Lite devices a breeze. No need to 
+Written in Python 3, require no external dependencies, pure Python!
 
 
 #### Wanna create an Echonet Lite packet?
