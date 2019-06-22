@@ -5,14 +5,14 @@ import logging
 import unittest
 import json
 
-ehd = None
-eoj_cgc = None
-eoj_cc = None
-esv = None
-epc = None
-epc_edt = None
-il = None
-fd = None
+ehd = None      # stores echonet_lite_EHD.json as dict
+eoj_cgc = None  # stores echonet_lite_EOJ_CGC.json as dict
+eoj_cc = None   # stores echonet_lite_EOJ_CC.json as dict
+esv = None      # stores echonet_lite_ESV.json as dict
+epc = None      # stores echonet_lite_EPC.json as dict
+epc_edt = None  # stores echonet_lite_EPC_EDT.json as dict
+il = None       # stores echonet_lite_IL.json as dict
+fd = None       # stores echonet_lite_FD.json as dict
 
 """
     Echonet Lite Functions
@@ -64,10 +64,9 @@ class EchonetLite():
             logging.exception("initEchonetLite() exception occurred.")
 
     # Helper: Python Dictionary Traversal
-    # Note: 1.
-    #       2. key search useful for both epc and eoj_cc json
-    #       3. if search argument is 1, function might return wrong value due to return of first value found (e.g. CC_NETWORK_CAMERA == CC_FIRST_AID_SENSOR == CC_BLOOD_SUGAR_METER, CC_FIRST_AID_SENSOR will be returned)
-    #       4.
+    # Note: 1. Used extensively by createPacket() and parsePacket() to generate and parse Echonet Lite packets
+    #       2. Key search useful for both epc and eoj_cc json
+    #       3. If search argument is 1, function might return wrong value due to return of first value found (e.g. CC_NETWORK_CAMERA == CC_FIRST_AID_SENSOR == CC_BLOOD_SUGAR_METER, CC_FIRST_AID_SENSOR will be returned)
     def dictTraverse(self, obj, path=None, callback=None, convert=False, search=None, key=False):
         search_value = None
         # Dictionary Traversal (recursive function)
@@ -275,26 +274,28 @@ class EchonetLite():
 
     # Parse Echonet Lite Packet
     # Note: 1. Error,return -1
-    #       2. Return raw value is raw_value is set to True, else auto convert values according to their respective EPC specification
-    #       3. TODO: add EDT range validation
-    def parsePacket(self, obj, value=True, raw_value=False):
+    #       2. Return values only if value_only is True, else include EPC and unit as tuple (EPC, "x.xx unit")
+    #       3. Return raw value if raw_value is True, else auto convert values according to their respective EPC specification
+    #       4. Return CGC and CC class info as a list [CGC, CC, (...)] or [CGC, CC, [...]] if class_info is True
+    #       5. Support auto conversion for unsigned char, signed char, unsigned short, signed short, unsigned long, signed long
+    #       6. TODO: add EDT range validation
+    def parsePacket(self, obj, value_only=True, raw_value=False, class_info=False):
         global ehd, eoj_cgc, eoj_cc, esv, epc, epc_edt, il, fd
-        logging.info(obj)
         try:
             if len(obj) > 12 and obj[0] == ehd['EHD1_ECHONET'] and obj[1] == ehd['EHD2_FORMAT1']:
                 self.echonet_packet[:len(obj)] = obj[:]
                 return_value = [] # init return value list for parsePacket()
+                cgc_str = self.dictTraverse(eoj_cgc, search=obj[4], key=True) # search key to retrieve CGC str
+                cc_str = self.dictTraverse(eoj_cc, search=[cgc_str, obj[5]], key=True) # search key to retrieve CC str
                 for i in range(obj[11]): # OPC
-                    temp_return_value = [] # used internally for OPC > 1
-                    cgc_str = self.dictTraverse(eoj_cgc, search=obj[4], key=True)
-                    cc_str = self.dictTraverse(eoj_cc, search=[cgc_str, obj[5]], key=True)
+                    temp_return_value = [] # specially used internally for OPC > 1
                     epc_num = self.getnEPC(i+1)
                     cgc_epc_str = cc_str
                     epc_cgc_str = self.dictTraverse(epc_edt, search=[cgc_epc_str, epc_num], key=True)
-                    if epc_cgc_str == None:
+                    if epc_cgc_str == None: # handle cases where CC does not have the target EPC code
                         cgc_epc_str = cgc_str
                         epc_cgc_str = self.dictTraverse(epc_edt, search=[cgc_epc_str, epc_num], key=True) # search CGC class for EPC
-                    if epc_cgc_str == None:
+                    if epc_cgc_str == None: # handle cases where CGC does not have the target EPC code
                         cgc_epc_str = "CGC_SUPERCLASS"
                         epc_cgc_str = self.dictTraverse(epc_edt, search=[cgc_epc_str, epc_num], key=True) # search CGC super class for EPC
                     epc_str = self.dictTraverse(epc_edt, search=[epc_cgc_str, epc_num], key=True)
@@ -303,23 +304,54 @@ class EchonetLite():
                     try: unit = epc_edt[cgc_epc_str][epc_cgc_str]["unit"] # get unit for data conversion
                     except: unit = None
                     if data_type == 'unsigned char': # no conversion needed
-                        if len(edt) == 1: return_value.append(self.dictTraverse(epc_edt, search=[cgc_epc_str, epc_cgc_str, edt[0]], key=True) if raw_value == False else edt[0])
-                        else: return_value.append(edt)
+                        for j in range(len(edt)):
+                            char_value = self.dictTraverse(epc_edt, search=[cgc_epc_str, epc_cgc_str, edt[j]], key=True) if raw_value == False else edt[j]
+                            if raw_value == False and char_value == 'EDT': char_value = edt[j] # handle cases where key is EDT, return raw value
+                            if unit is not None and value_only == False: char_value = str(char_value) + " " + unit.split()[1] if (unit[0].isdigit() and raw_value == False) else str(char_value) + " " + unit # convert to str + unit
+                            if value_only == False: temp_return_value.append((epc_cgc_str, char_value))
+                            else: temp_return_value.append(char_value)
+                    elif data_type == 'signed char': # convert to signed. no need to convert based on unit as they won't be some float values
+                        for j in range(len(edt)):
+                            char_value = edt[j]
+                            if raw_value == False: char_value = char_value if char_value < (1 << 8-1) else char_value - (1 << 8)
+                            if unit is not None and value_only == False: char_value = str(char_value) + " " + unit.split()[1] if (unit[0].isdigit() and raw_value == False) else str(char_value) + " " + unit # convert to str + unit
+                            if value_only == False: temp_return_value.append((epc_cgc_str, char_value))
+                            else: temp_return_value.append(char_value)
                     elif data_type == 'unsigned short' or data_type == 'signed short': # convert to int or float (list if needed)
                         for j in range(int(len(edt)/2)):
                             short_value = edt[(j*2)] << 8 | edt[(j*2)+1] & 0xFF
                             if data_type == 'signed short' and raw_value == False: short_value = short_value if short_value < (1 << 16-1) else short_value - (1 << 16)
                             if unit is not None and raw_value == False: # if unit property exist in EPC, convert
                                 try:
-                                    unit = float(unit.split()[0]) if '.' in unit else int(unit.split()[0]) # try to find int or float
-                                    short_value = float(short_value) * unit # apply unit to the value
+                                    unit_only = float(unit.split()[0]) if '.' in unit else int(unit.split()[0]) # try to find int or float
+                                    short_value = float(short_value) * unit_only # apply unit to the value
                                 except: pass
-                            temp_return_value.append(short_value)
-                        if len(temp_return_value) == 1: return_value.append(temp_return_value[0]) # unpack list
-                        else: return_value.append(temp_return_value) # return whole list
+                            if unit is not None and value_only == False: short_value = str(short_value) + " " + unit.split()[1] if (unit[0].isdigit() and raw_value == False) else str(short_value) + " " + unit # convert to str + unit
+                            if value_only == False: temp_return_value.append((epc_cgc_str, short_value))
+                            else: temp_return_value.append(short_value)
+                    elif data_type == 'unsigned long' or data_type == 'signed long': # convert to int or float (list if needed)
+                        for j in range(int(len(edt)/4)):
+                            long_value = edt[(j*4)] << 24 | edt[(j*4)+1] << 16 | edt[(j*4)+2] << 8 | edt[(j*4)+3] & 0xFF
+                            if data_type == 'signed long' and raw_value == False: long_value = long_value if long_value < (1 << 32-1) else long_value - (1 << 32)
+                            if unit is not None and raw_value == False: # if unit property exist in EPC, convert
+                                try:
+                                    unit_only = float(unit.split()[0]) if '.' in unit else int(unit.split()[0]) # try to find int or float
+                                    long_value = float(long_value) * unit_only # apply unit to the value
+                                except: pass
+                            if unit is not None and value_only == False: long_value = str(long_value) + " " + unit.split()[1] if (unit[0].isdigit() and raw_value == False) else str(long_value) + " " + unit # convert to str + unit
+                            if value_only == False: temp_return_value.append((epc_cgc_str, long_value))
+                            else: temp_return_value.append(long_value)
                     else:
                         logging.error("parsePacket() data_type {} undefined in function.".format(data_type))
-                return return_value
+                        return -1
+                    if len(temp_return_value) == 1: return_value.append(temp_return_value[0]) # unpack list
+                    else: return_value.append(temp_return_value) # return whole list
+                if class_info == False:
+                    if len(return_value) == 1: return_value = return_value[0] # finally, unpack list
+                    return return_value # finally return the values
+                else:
+                    if len(return_value) == 1: return_value = [cgc_str, cc_str, return_value[0]] # finally, unpack list
+                    return [cgc_str, cc_str, return_value] # finally return the values
             else:
                 logging.error("parsePacket() invalid Echonet Lite packet.")
                 return -1
@@ -430,6 +462,11 @@ class testEchonetLite(unittest.TestCase):
         test_packet = [0x10, 0x81, 0x00, 0x00, 0x00, 0x11, 0x01, 0x0E, 0xF0, 0x01, 0x72, 0x02, 0x80, 0x01, 0x30, 0xE0, 0x02, 0x00, 0xEB]
         self.assertEqual(self.obj.parsePacket(test_packet), ['on', 23.5])
         self.assertEqual(self.obj.parsePacket(test_packet, raw_value=True), [0x30, 0xEB])
-
+        self.assertEqual(self.obj.parsePacket(test_packet, value_only=False), [('EPC_OPERATIONAL_STATUS', 'on'), ('EPC_TEMPERATURE_VALUE', '23.5 Celsius')])
+        self.assertEqual(self.obj.parsePacket(test_packet, value_only=False, raw_value=True), [('EPC_OPERATIONAL_STATUS', 48), ('EPC_TEMPERATURE_VALUE', '235 0.1 Celsius')])
+        self.assertEqual(self.obj.parsePacket(test_packet, class_info=True), ['CGC_SENSOR_RELATED', 'CC_TEMPERATURE_SENSOR', ['on', 23.5]])
+        self.assertEqual(self.obj.parsePacket(test_packet, value_only=False, class_info=True), ['CGC_SENSOR_RELATED', 'CC_TEMPERATURE_SENSOR', [('EPC_OPERATIONAL_STATUS', 'on'), ('EPC_TEMPERATURE_VALUE', '23.5 Celsius')]])
+        self.assertEqual(self.obj.parsePacket(test_packet, value_only=False, raw_value=True , class_info=True), ['CGC_SENSOR_RELATED', 'CC_TEMPERATURE_SENSOR', [('EPC_OPERATIONAL_STATUS', 48), ('EPC_TEMPERATURE_VALUE', '235 0.1 Celsius')]])
+                         
 if __name__ == '__main__':
     unittest.main()

@@ -452,7 +452,7 @@
             "range":                    ["0x0000", "0xFFFD"],
             "data_type":                "unsigned short",
             "size":                     2,
-            "unit":                     "lux",
+            "unit":                     "Lux",
             "access":                   ["get"],
             "mandatory":                ["get"],
             "announce_status_change":   false
@@ -476,7 +476,7 @@
             "range":                    ["0xF554", "0x7FFE"],
             "data_type":                "signed short",
             "size":                     2,
-            "unit":                     "0.1 celsius",
+            "unit":                     "0.1 Celsius",
             "access":                   ["get"],
             "mandatory":                ["get"],
             "announce_status_change":   false
@@ -902,7 +902,7 @@
             "range":                    ["0x00", "0x32"],
             "data_type":                "unsigned char",
             "size":                     1,
-            "unit":                     "celsius",
+            "unit":                     "Celsius",
             "access":                   ["set", "get"],
             "mandatory":                ["set", "get"],
             "announce_status_change":   false
@@ -924,7 +924,7 @@
             "range":                    ["0x00", "0x32"],
             "data_type":                "unsigned char",
             "size":                     1,
-            "unit":                     "celsius",
+            "unit":                     "Celsius",
             "access":                   ["set", "get"],
             "mandatory":                [],
             "announce_status_change":   false
@@ -935,7 +935,7 @@
             "range":                    ["0x00", "0x32"],
             "data_type":                "unsigned char",
             "size":                     1,
-            "unit":                     "celsius",
+            "unit":                     "Celsius",
             "access":                   ["set", "get"],
             "mandatory":                [],
             "announce_status_change":   false
@@ -946,7 +946,7 @@
             "range":                    ["0x00", "0x32"],
             "data_type":                "unsigned char",
             "size":                     1,
-            "unit":                     "celsius",
+            "unit":                     "Celsius",
             "access":                   ["set", "get"],
             "mandatory":                [],
             "announce_status_change":   false
@@ -990,7 +990,7 @@
             "range":                    ["0x81", "0x7D"],
             "data_type":                "signed char",
             "size":                     1,
-            "unit":                     "celsius",
+            "unit":                     "Celsius",
             "access":                   ["get"],
             "mandatory":                ["get"],
             "announce_status_change":   false
@@ -1001,7 +1001,7 @@
             "range":                    ["0x00", "0x32"],
             "data_type":                "unsigned char",
             "size":                     1,
-            "unit":                     "celsius",
+            "unit":                     "Celsius",
             "access":                   ["get"],
             "mandatory":                [],
             "announce_status_change":   false
@@ -1012,7 +1012,7 @@
             "range":                    ["0x81", "0x7D"],
             "data_type":                "signed char",
             "size":                     1,
-            "unit":                     "celsius",
+            "unit":                     "Celsius",
             "access":                   ["get"],
             "mandatory":                [],
             "announce_status_change":   false
@@ -1023,7 +1023,7 @@
             "range":                    ["0x81", "0x7D"],
             "data_type":                "signed char",
             "size":                     1,
-            "unit":                     "celsius",
+            "unit":                     "Celsius",
             "access":                   ["get"],
             "mandatory":                [],
             "announce_status_change":   false
@@ -1034,7 +1034,7 @@
             "range":                    ["0x81", "0x7D"],
             "data_type":                "unsigned char",
             "size":                     1,
-            "unit":                     "0.1 celsius",
+            "unit":                     "0.1 Celsius",
             "access":                   ["set", "get"],
             "mandatory":                [],
             "announce_status_change":   false
