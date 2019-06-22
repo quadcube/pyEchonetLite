@@ -66,6 +66,8 @@ class EchonetLite():
     # Helper: Python Dictionary Traversal
     # Note: 1.
     #       2. key search useful for both epc and eoj_cc json
+    #       3. if search argument is 1, function might return wrong value due to return of first value found (e.g. CC_NETWORK_CAMERA == CC_FIRST_AID_SENSOR == CC_BLOOD_SUGAR_METER, CC_FIRST_AID_SENSOR will be returned)
+    #       4.
     def dictTraverse(self, obj, path=None, callback=None, convert=False, search=None, key=False):
         search_value = None
         # Dictionary Traversal (recursive function)
@@ -77,16 +79,21 @@ class EchonetLite():
                 for k, v in obj.items():
                     #print(f"dict() path {path}, key {k}, value {v}\n\n")
                     if search is not None: # search for value
-                        if all(elem in path for elem in search) and k == target and key == False:
+                        if all(elem in path for elem in search) and k == target and key == False: # TODO: below all(lists) method might be more versatile for non-key search
                             search_value = v
                             raise StopIteration # break all iteration
                         elif key == True:
-                            if k == search[0]:
-                                search_value = path[0]
-                                raise StopIteration # break all iteration
-                            elif v == search[0]:
-                                search_value = k
-                                raise StopIteration # break all iteration
+                            if len(search) > 1: # this returns more accurate result compared to len(search)==1
+                                if all(elem in path + [k] + [v] for elem in search):
+                                    search_value = ([elem for elem in path + [k] + [v] if not any(elem in [elem1] for elem1 in search)])[0]
+                                    raise StopIteration # break all iteration
+                            elif len(search) == 1: # might return wrong value due to return of first value found (e.g. CC_NETWORK_CAMERA == CC_FIRST_AID_SENSOR == CC_BLOOD_SUGAR_METER, CC_FIRST_AID_SENSOR will be returned)
+                                if k == search[0]:
+                                    search_value = path[0]
+                                    raise StopIteration # break all iteration
+                                elif v == search[0]:
+                                    search_value = k
+                                    raise StopIteration # break all iteration
                     value.update({k: _inner_traversal(v, path + [k], callback, convert, search, target, key)})
             elif isinstance(obj, list):
                 value = [] #value = [self.dictTraverse(elem, path + [[]], callback, convert, search) for elem in obj]
@@ -246,6 +253,7 @@ class EchonetLite():
         if not isinstance(EPC, list): EPC = [EPC]  # make sure EPC is a list
         if not isinstance(EPC_EDT, list): EPC_EDT = [EPC_EDT]  # make sure EPC_EDT is a list
         OPC = len(EPC) if EPC_EDT == [()] else len(EPC_EDT) # calculate OPC
+        if ESV == 'ESV_Get' and EPC_EDT != [()]: ESV = 'ESV_SetC'
         self.echonet_packet[:] = [0 for _ in self.echonet_packet[:]] # reset global var
         scgc_key = self.dictTraverse(eoj_cc, search=SEOJ_CC, key=True)
         dcgc_key = self.dictTraverse(eoj_cc, search=DEOJ_CC, key=True)
@@ -257,12 +265,67 @@ class EchonetLite():
                 target_pdc = 0
             else:
                 target_epc = EPC_EDT[i][0]
-                target_pdc = len(EPC_EDT[i][1])
+                target_pdc = len([EPC_EDT[i][1]]) if not isinstance(EPC_EDT[i][1], list) else len(EPC_EDT[i][1]) # make sure EPC_EDT[i][1] is a list
             self.setnEPC(i+1, self.dictTraverse(epc_edt, search=target_epc))
             self.setnPDC(i+1, target_pdc)
             if not EPC_EDT == [()]:
-                self.setnEDT(i+1, EPC_EDT[i][1])
+                target_edt = self.dictTraverse(epc_edt, search=EPC_EDT[i][1]) if isinstance(EPC_EDT[i][1], str) else EPC_EDT[i][1]
+                self.setnEDT(i+1, target_edt)
         return self.echonet_packet[:self.current_echonet_packet_len]
+
+    # Parse Echonet Lite Packet
+    # Note: 1. Error,return -1
+    #       2. Return raw value is raw_value is set to True, else auto convert values according to their respective EPC specification
+    #       3. TODO: add EDT range validation
+    def parsePacket(self, obj, value=True, raw_value=False):
+        global ehd, eoj_cgc, eoj_cc, esv, epc, epc_edt, il, fd
+        logging.info(obj)
+        try:
+            if len(obj) > 12 and obj[0] == ehd['EHD1_ECHONET'] and obj[1] == ehd['EHD2_FORMAT1']:
+                self.echonet_packet[:len(obj)] = obj[:]
+                return_value = [] # init return value list for parsePacket()
+                for i in range(obj[11]): # OPC
+                    temp_return_value = [] # used internally for OPC > 1
+                    cgc_str = self.dictTraverse(eoj_cgc, search=obj[4], key=True)
+                    cc_str = self.dictTraverse(eoj_cc, search=[cgc_str, obj[5]], key=True)
+                    epc_num = self.getnEPC(i+1)
+                    cgc_epc_str = cc_str
+                    epc_cgc_str = self.dictTraverse(epc_edt, search=[cgc_epc_str, epc_num], key=True)
+                    if epc_cgc_str == None:
+                        cgc_epc_str = cgc_str
+                        epc_cgc_str = self.dictTraverse(epc_edt, search=[cgc_epc_str, epc_num], key=True) # search CGC class for EPC
+                    if epc_cgc_str == None:
+                        cgc_epc_str = "CGC_SUPERCLASS"
+                        epc_cgc_str = self.dictTraverse(epc_edt, search=[cgc_epc_str, epc_num], key=True) # search CGC super class for EPC
+                    epc_str = self.dictTraverse(epc_edt, search=[epc_cgc_str, epc_num], key=True)
+                    edt = self.getnEDT(i+1) # get EDT list
+                    data_type = epc_edt[cgc_epc_str][epc_cgc_str]["data_type"] # get data type for data concatenate or conversion
+                    try: unit = epc_edt[cgc_epc_str][epc_cgc_str]["unit"] # get unit for data conversion
+                    except: unit = None
+                    if data_type == 'unsigned char': # no conversion needed
+                        if len(edt) == 1: return_value.append(self.dictTraverse(epc_edt, search=[cgc_epc_str, epc_cgc_str, edt[0]], key=True) if raw_value == False else edt[0])
+                        else: return_value.append(edt)
+                    elif data_type == 'unsigned short' or data_type == 'signed short': # convert to int or float (list if needed)
+                        for j in range(int(len(edt)/2)):
+                            short_value = edt[(j*2)] << 8 | edt[(j*2)+1] & 0xFF
+                            if data_type == 'signed short' and raw_value == False: short_value = short_value if short_value < (1 << 16-1) else short_value - (1 << 16)
+                            if unit is not None and raw_value == False: # if unit property exist in EPC, convert
+                                try:
+                                    unit = float(unit.split()[0]) if '.' in unit else int(unit.split()[0]) # try to find int or float
+                                    short_value = float(short_value) * unit # apply unit to the value
+                                except: pass
+                            temp_return_value.append(short_value)
+                        if len(temp_return_value) == 1: return_value.append(temp_return_value[0]) # unpack list
+                        else: return_value.append(temp_return_value) # return whole list
+                    else:
+                        logging.error("parsePacket() data_type {} undefined in function.".format(data_type))
+                return return_value
+            else:
+                logging.error("parsePacket() invalid Echonet Lite packet.")
+                return -1
+        except Exception as e:
+            logging.exception("parsePacket() exception occurred.")
+            return -1
 
 """
     Echonet Lite Function Test Units
@@ -353,44 +416,20 @@ class testEchonetLite(unittest.TestCase):
         self.assertEqual(self.obj.dictTraverse(eoj_cc, search=0x0B, key=True), "CC_AIR_POLLUTION_SENSOR") # search for key
         self.assertEqual(self.obj.dictTraverse(eoj_cc, search="CC_AIR_POLLUTION_SENSOR", key=True), "CGC_SENSOR_RELATED")
         self.assertEqual(self.obj.dictTraverse(eoj_cgc, search=0x05, key=True), "CGC_MANAGEMENT_RELATED")
+        self.assertEqual(self.obj.dictTraverse(eoj_cc, search=[0x04, "CGC_AV_RELATED"], key=True), "CC_NETWORK_CAMERA") # test multi search values for key
+        self.assertEqual(self.obj.dictTraverse(epc_edt, search=["CC_TEMPERATURE_SENSOR", 'value', 0xE0], key=True), "EPC_TEMPERATURE_VALUE")
+        self.assertEqual(self.obj.dictTraverse(epc_edt, search=["CC_TEMPERATURE_SENSOR", 0xE0], key=True), "EPC_TEMPERATURE_VALUE") # Note: might be based on assumption!
 
     def test_createPacket(self):
         self.assertEqual(self.obj.createPacket("CC_TEMPERATURE_SENSOR"), [0x10, 0x81, 0x00, 0x00, 0x0E, 0xF0, 0x01, 0x00, 0x11, 0x01, 0x62, 0x01, 0x80, 0x00])
         self.assertEqual(self.obj.createPacket("CC_TEMPERATURE_SENSOR", EPC=["EPC_OPERATIONAL_STATUS", "EPC_TEMPERATURE_VALUE"]), [0x10, 0x81, 0x00, 0x00, 0x0E, 0xF0, 0x01, 0x00, 0x11, 0x01, 0x62, 0x02, 0x80, 0, 0xE0, 0])
-        #print(self.obj.createPacket("CC_HOME_AIR_CONDITIONER", ESV='ESV_SetC', EPC_EDT=[("EPC_OPERATIONAL_STATUS",0x30), ("EPC_OPERATION_MODE_SETTING", 0x41)]))
+        self.assertEqual(self.obj.createPacket("CC_HOME_AIR_CONDITIONER", ESV='ESV_SetC', EPC_EDT=[("EPC_OPERATIONAL_STATUS",0x30), ("EPC_OPERATION_MODE_SETTING", 0x41)]), [0x10, 0x81, 0x00, 0x00, 0x0E, 0xF0, 0x01, 0x01, 0x30, 0x01, 0x61, 0x02, 0x80, 0x01, 0x30, 0xB0, 0x01, 0x41])
+        self.assertEqual(self.obj.createPacket("CC_HOME_AIR_CONDITIONER", ESV='ESV_SetC', EPC_EDT=[("EPC_OPERATIONAL_STATUS", "on"), ("EPC_OPERATION_MODE_SETTING", "automatic")]), [0x10, 0x81, 0x00, 0x00, 0x0E, 0xF0, 0x01, 0x01, 0x30, 0x01, 0x61, 0x02, 0x80, 0x01, 0x30, 0xB0, 0x01, 0x41])
 
-
-
-
-
-
-
-
-
-
-
-#                         ehd1  ehd2  tid   tid   seoj  seoj  seoj  deoj  deoj  deoj  esv  opc epc  pdc edt
-ECHONET_MSG_SET_WINDOW = [0x10, 0x81, 0x00, 0xFF, 0x0E, 0xF0, 0x01, 0x05, 0xFD, 0x01, 0x61, 1, 0x80, 1, 0x30]
-# tid 0x00 and 0x01 reserved for indoor n outdoor temp
-ECHONET_MSG_TEMPERATURE = [0x10, 0x81, 0x00, 0x01, 0x0E, 0xF0, 0x01, 0x00, 0x11, 0x01, 0x62, 1, 0xE0, 0]
-ECHONET_MSG_AIRSPEED = [0x10, 0x81, 0x00, 0x02, 0x0E, 0xF0, 0x01, 0x00, 0x1F, 0x01, 0x62, 1, 0xE0, 0]
-ECHONET_MSG_GET_AIRCOND = [0x10, 0x81, 0x00, 0x03, 0x0E, 0xF0, 0x01, 0x01, 0x30, 0x01, 0x62, 1, 0x80, 0] # EPC_OPERATIONAL_STATUS=0x80
-ECHONET_MSG_SET_AIRCOND = [0x10, 0x81, 0x00, 0x04, 0x0E, 0xF0, 0x01, 0x01, 0x30, 0x01, 0x61, 1, 0x80, 1, 0x31] # 0x31 OFF
-ECHONET_MSG_AIRCOND_HEAT = [0x10, 0x81, 0x00, 0x05, 0x0E, 0xF0, 0x01, 0x01, 0x30, 0x01, 0x61, 1, 0xB0, 1, 0x41] # EPC_MODE = 0xB0 ESV_SetC = 0x61, Aircond mode: 0x41 (auto)
-ECHONET_MSG_AIRCOND_SET_TEMP = [0x10, 0x81, 0x00, 0x06, 0x0E, 0xF0, 0x01, 0x01, 0x30, 0x01, 0x61, 1, 0xB3, 1, 0x19] # EPC_TEMP = 0xB3 ESV_SetC = 0x61, Temp range: 0x00 - 0x32 (0x19 : 25 Celsius)
-ECHONET_MSG_AIRCOND_GET_TEMP = [0x10, 0x81, 0x00, 0x07, 0x0E, 0xF0, 0x01, 0x01, 0x30, 0x01, 0x62, 1, 0xB3, 0]
-#                            ehd1  ehd2  tid   tid   seoj  seoj  seoj  deoj  deoj  deoj  esv  opc epc
-ECHONET_MSG_POWERMETER_D1 = [0x10, 0x81, 0x00, 0x08, 0x0E, 0xF0, 0x01, 0x02, 0x87, 0x01, 0x62, 1, 0xD1, 0]
-ECHONET_MSG_POWERMETER_D2 = [0x10, 0x81, 0x00, 0x09, 0x0E, 0xF0, 0x01, 0x02, 0x87, 0x01, 0x62, 1, 0xD2, 0]
-ECHONET_MSG_POWERMETER_D3 = [0x10, 0x81, 0x00, 0x0A, 0x0E, 0xF0, 0x01, 0x02, 0x87, 0x01, 0x62, 1, 0xD3, 0]
-ECHONET_MSG_POWERMETER_D4 = [0x10, 0x81, 0x00, 0x0B, 0x0E, 0xF0, 0x01, 0x02, 0x87, 0x01, 0x62, 1, 0xD4, 0]
-ECHONET_MSG_POWERMETER_D5 = [0x10, 0x81, 0x00, 0x0C, 0x0E, 0xF0, 0x01, 0x02, 0x87, 0x01, 0x62, 1, 0xD5, 0]
-ECHONET_MSG_POWERMETER_D6 = [0x10, 0x81, 0x00, 0x0D, 0x0E, 0xF0, 0x01, 0x02, 0x87, 0x01, 0x62, 1, 0xD6, 0]
-ECHONET_MSG_POWERMETER_D7 = [0x10, 0x81, 0x00, 0x0E, 0x0E, 0xF0, 0x01, 0x02, 0x87, 0x01, 0x62, 1, 0xD7, 0]
-ECHONET_MSG_POWERMETER_D8 = [0x10, 0x81, 0x00, 0x0F, 0x0E, 0xF0, 0x01, 0x02, 0x87, 0x01, 0x62, 1, 0xD8, 0]
-ECHONET_MSG_POWERMETER_D9 = [0x10, 0x81, 0x00, 0x10, 0x0E, 0xF0, 0x01, 0x02, 0x87, 0x01, 0x62, 1, 0xD9, 0]
-ECHONET_MSG_AIRCOND_GET_SENSETEMP = [0x10, 0x81, 0x00, 0x11, 0x0E, 0xF0, 0x01, 0x01, 0x30, 0x01, 0x62, 1, 0xBB, 0]
-
+    def test_parsePacket(self):
+        test_packet = [0x10, 0x81, 0x00, 0x00, 0x00, 0x11, 0x01, 0x0E, 0xF0, 0x01, 0x72, 0x02, 0x80, 0x01, 0x30, 0xE0, 0x02, 0x00, 0xEB]
+        self.assertEqual(self.obj.parsePacket(test_packet), ['on', 23.5])
+        self.assertEqual(self.obj.parsePacket(test_packet, raw_value=True), [0x30, 0xEB])
 
 if __name__ == '__main__':
     unittest.main()

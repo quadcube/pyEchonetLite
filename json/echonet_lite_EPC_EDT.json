@@ -439,7 +439,7 @@
             "range":                    ["0x0000", "0x2710"],
             "data_type":                "unsigned short",
             "size":                     2,
-            "unit":                     "0.01%",
+            "unit":                     "0.01 %",
             "access":                   ["get"],
             "mandatory":                ["get"],
             "announce_status_change":   false
