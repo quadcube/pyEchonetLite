@@ -2,19 +2,19 @@
 Too lazy to search specification documents for Class Group Code, source EOJ, ESV, etc.? Written in Python 3, require no external dependencies, pure Python!
 
 
-Wanna create an Echonet Lite packet?
+#### Wanna create an Echonet Lite packet?
 ```
 createPacket("CC_TEMPERATURE_SENSOR")
 ```
 
 
-Parsing an Echonet Lite packet?
+#### Parsing an Echonet Lite packet?
 ```
 parsePacket(echonetlite_packet)
 ```
 
 
-Simple as that. All you need is 3 lines to get going:
+#### Simple as that. All you need is 3 lines to get going:
 ```
 obj = EchonetLite()
 echonetlite_packet = obj.createPacket(arg)
