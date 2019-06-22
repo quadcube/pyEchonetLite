@@ -1,6 +1,6 @@
 # pyEchonetLite: Echonet Lite for Human
 Too lazy to search specification documents for mundane stuffs like Class Group Code, source EOJ, ESV, etc.? 
-pyEchonetLite was created to make interfacing with Echonet Lite devices a breeze. No need to 
+pyEchonetLite was created to make interfacing with Echonet Lite devices a breeze.
 Written in Python 3, require no external dependencies, pure Python!
 
 
