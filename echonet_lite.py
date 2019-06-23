@@ -245,18 +245,37 @@ class EchonetLite():
             return -1
         
     # Create Echonet Lite Packet
-    # Note: 1. TID can accept both single 16 bit integer and two 8 bit integer list
-    def createPacket(self, DEOJ_CC, TID=0x00, SEOJ_CC='CC_NODE_PROFILE', SEOJ_IC=0x01, DEOJ_IC=0x01, EPC="EPC_OPERATIONAL_STATUS", ESV='ESV_Get', EPC_EDT=()):
+    # Note: 1. Error, return -1
+    #       2. SEOJ_CC and DEOJ_CC is able to accept both str and int, however if either one or both are int, its respective EOJ_CGC is required
+    #       3. ESV is able to accept both str and int. e.g. "ESV_Get" = 0x62
+    #       4. EPC and EPC_EDT are both able to accept str and int, e.g. "EPC_OPERATIONAL_STATUS" = 0x80, "on" = 0x41
+    #       5. TID can accept both single 16 bit integer and two 8 bit integer list
+    def createPacket(self, DEOJ_CC, TID=0x00, SEOJ_CC='CC_NODE_PROFILE', SEOJ_IC=0x01, DEOJ_IC=0x01, EPC="EPC_OPERATIONAL_STATUS", ESV='ESV_Get', EPC_EDT=(), DEOJ_CGC=None, SEOJ_CGC=None):
         global ehd, eoj_cgc, eoj_cc, esv, epc, epc_edt, il, fd
         if not isinstance(TID, list): TID = [TID >> 8, TID & 0x00ff] # convert TID to list
         if not isinstance(EPC, list): EPC = [EPC]  # make sure EPC is a list
         if not isinstance(EPC_EDT, list): EPC_EDT = [EPC_EDT]  # make sure EPC_EDT is a list
         OPC = len(EPC) if EPC_EDT == [()] else len(EPC_EDT) # calculate OPC
         if ESV == 'ESV_Get' and EPC_EDT != [()]: ESV = 'ESV_SetC'
+        ESV = esv[ESV] if isinstance(ESV, str) else ESV # check whether ESV is str
+        if isinstance(DEOJ_CC, str) and DEOJ_CGC == None:
+            dcgc_key = self.dictTraverse(eoj_cc, search=DEOJ_CC, key=True)
+            deoj_cgc = eoj_cgc[dcgc_key]
+            deoj_cc = eoj_cc[dcgc_key][DEOJ_CC]
+        elif isinstance(DEOJ_CC, int) and DEOJ_CGC != None:
+            deoj_cgc = DEOJ_CGC if isinstance(DEOJ_CGC, int) else self.dictTraverse(eoj_cgc, search=DEOJ_CGC)
+            deoj_cc = DEOJ_CC
+        else: return -1 # don't accept int DEOJ_CC without providing DEOJ_CGC
+        if isinstance(SEOJ_CC, str) and SEOJ_CGC == None:
+            scgc_key = self.dictTraverse(eoj_cc, search=SEOJ_CC, key=True)
+            seoj_cgc = eoj_cgc[scgc_key]
+            seoj_cc = eoj_cc[scgc_key][SEOJ_CC]
+        elif isinstance(SEOJ_CC, int) and SEOJ_CGC != None:
+            seoj_cgc = SEOJ_CGC if isinstance(SEOJ_CGC, int) else self.dictTraverse(eoj_cgc, search=SEOJ_CGC)
+            seoj_cc = SEOJ_CC
+        else: return -1 # don't accept int SEOJ_CC without providing SEOJ_CGC
         self.echonet_packet[:] = [0 for _ in self.echonet_packet[:]] # reset global var
-        scgc_key = self.dictTraverse(eoj_cc, search=SEOJ_CC, key=True)
-        dcgc_key = self.dictTraverse(eoj_cc, search=DEOJ_CC, key=True)
-        self.echonet_packet[:12] = [ehd['EHD1_ECHONET'], ehd['EHD2_FORMAT1'], TID[0], TID[1], eoj_cgc[scgc_key], eoj_cc[scgc_key][SEOJ_CC], SEOJ_IC, eoj_cgc[dcgc_key], eoj_cc[dcgc_key][DEOJ_CC], DEOJ_IC, esv[ESV], OPC]
+        self.echonet_packet[:12] = [ehd['EHD1_ECHONET'], ehd['EHD2_FORMAT1'], TID[0], TID[1], seoj_cgc, seoj_cc, SEOJ_IC, deoj_cgc, deoj_cc, DEOJ_IC, ESV, OPC]
         self.current_echonet_packet_len = 12 # reset current Echonet packet length
         for i in range(OPC):
             if EPC_EDT == [()]:
@@ -265,7 +284,8 @@ class EchonetLite():
             else:
                 target_epc = EPC_EDT[i][0]
                 target_pdc = len([EPC_EDT[i][1]]) if not isinstance(EPC_EDT[i][1], list) else len(EPC_EDT[i][1]) # make sure EPC_EDT[i][1] is a list
-            self.setnEPC(i+1, self.dictTraverse(epc_edt, search=target_epc))
+            if isinstance(target_epc, str): target_epc = self.dictTraverse(epc_edt, search=target_epc)
+            self.setnEPC(i+1, target_epc)
             self.setnPDC(i+1, target_pdc)
             if not EPC_EDT == [()]:
                 target_edt = self.dictTraverse(epc_edt, search=EPC_EDT[i][1]) if isinstance(EPC_EDT[i][1], str) else EPC_EDT[i][1]
@@ -457,6 +477,9 @@ class testEchonetLite(unittest.TestCase):
         self.assertEqual(self.obj.createPacket("CC_TEMPERATURE_SENSOR", EPC=["EPC_OPERATIONAL_STATUS", "EPC_TEMPERATURE_VALUE"]), [0x10, 0x81, 0x00, 0x00, 0x0E, 0xF0, 0x01, 0x00, 0x11, 0x01, 0x62, 0x02, 0x80, 0, 0xE0, 0])
         self.assertEqual(self.obj.createPacket("CC_HOME_AIR_CONDITIONER", ESV='ESV_SetC', EPC_EDT=[("EPC_OPERATIONAL_STATUS",0x30), ("EPC_OPERATION_MODE_SETTING", 0x41)]), [0x10, 0x81, 0x00, 0x00, 0x0E, 0xF0, 0x01, 0x01, 0x30, 0x01, 0x61, 0x02, 0x80, 0x01, 0x30, 0xB0, 0x01, 0x41])
         self.assertEqual(self.obj.createPacket("CC_HOME_AIR_CONDITIONER", ESV='ESV_SetC', EPC_EDT=[("EPC_OPERATIONAL_STATUS", "on"), ("EPC_OPERATION_MODE_SETTING", "automatic")]), [0x10, 0x81, 0x00, 0x00, 0x0E, 0xF0, 0x01, 0x01, 0x30, 0x01, 0x61, 0x02, 0x80, 0x01, 0x30, 0xB0, 0x01, 0x41])
+        self.assertEqual(self.obj.createPacket(0x11, DEOJ_CGC=0x00), [0x10, 0x81, 0x00, 0x00, 0x0E, 0xF0, 0x01, 0x00, 0x11, 0x01, 0x62, 0x01, 0x80, 0x00]) # test whether input raw EOJ_CC and EOJ_CGC
+        self.assertEqual(self.obj.createPacket(0x11, DEOJ_CGC="CGC_SENSOR_RELATED"), [0x10, 0x81, 0x00, 0x00, 0x0E, 0xF0, 0x01, 0x00, 0x11, 0x01, 0x62, 0x01, 0x80, 0x00]) # test whether input raw EOJ_CC and str EOJ_CGC
+        self.assertEqual(self.obj.createPacket("CC_TEMPERATURE_SENSOR", EPC=[0x80, 0xE0]), [0x10, 0x81, 0x00, 0x00, 0x0E, 0xF0, 0x01, 0x00, 0x11, 0x01, 0x62, 0x02, 0x80, 0, 0xE0, 0])
 
     def test_parsePacket(self):
         test_packet = [0x10, 0x81, 0x00, 0x00, 0x00, 0x11, 0x01, 0x0E, 0xF0, 0x01, 0x72, 0x02, 0x80, 0x01, 0x30, 0xE0, 0x02, 0x00, 0xEB]
