@@ -1371,7 +1371,163 @@
         
     },
     "CGC_HOUSING_RELATED": {
-        
+        "EPC_MASTER_RATED_CAPACITY": {
+            "value":                    "0xB0",
+            "EDT":                      "",
+            "range":                    ["0x00", "0xFD"],
+            "data_type":                "unsigned char",
+            "size":                     1,
+            "unit":                     "A",
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_NUMBER_OF_MEASUREMENT_CHANNEL_SIMPLEX": {
+            "value":                    "0xB1",
+            "EDT":                      "",
+            "range":                    ["0x01", "0xFC"],
+            "data_type":                "unsigned char",
+            "size":                     1,
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_CHANNEL_RANGE_SPECIFICATION_FOR_CUMULATIVE_POWER_CONSUMPTION_VALUE_SIMPLEX": {
+            "value":                    "0xB2",
+            "EDT":                      "",
+            "range":                    [["0x01", "0xFC"], ["0x01", "0x3C"]],
+            "data_type":                "unsigned char",
+            "size":                     2,
+            "access":                   ["set", "get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_CUMULATIVE_POWER_CONSUMPTION_VALUE_LIST_SIMPLEX": {
+            "value":                    "0xB3",
+            "EDT":                      "",
+            "range":                    [["0x01", "0xFC"], ["0x01", "0x3C"], ["0x00000000", "0x05F5E0FF"]],
+            "data_type":                ["unsigned char", "unsigned char", "unsigned long"],
+            "size":                     242,
+            "unit":                     "kWh",
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_CHANNEL_RANGE_SPECIFICATION_FOR_INSTANTANEOUS_CURRENT_VALUE_SIMPLEX": {
+            "value":                    "0xB4",
+            "EDT":                      "",
+            "range":                    [["0x01", "0xFC"], ["0x01", "0x3C"]],
+            "data_type":                "unsigned char",
+            "size":                     2,
+            "access":                   ["set", "get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_INSTANTANEOUS_CURRENT_VALUE_LIST_SIMPLEX": {
+            "value":                    "0xB5",
+            "EDT":                      "",
+            "range":                    [["0x01", "0xFC"], ["0x01", "0x3C"], ["0x8001", "0x7FFD"]],
+            "data_type":                ["unsigned char", "unsigned char", "unsigned short"],
+            "size":                     242,
+            "unit":                     "0.1 A",
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_CHANNEL_RANGE_SPECIFICATION_FOR_INSTANTANEOUS_POWER_CONSUMPTION_VALUE_SIMPLEX": {
+            "value":                    "0xB6",
+            "EDT":                      "",
+            "range":                    [["0x01", "0xFC"], ["0x01", "0x3C"]],
+            "data_type":                "unsigned char",
+            "size":                     2,
+            "access":                   ["set", "get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_INSTANTANEOUS_POWER_CONSUMPTION_VALUE_LIST_SIMPLEX": {
+            "value":                    "0xB7",
+            "EDT":                      "",
+            "range":                    [["0x01", "0xFC"], ["0x01", "0x3C"], ["0x80000001", "0x7FFFFFFD"]],
+            "data_type":                ["unsigned char", "unsigned char", "unsigned long"],
+            "size":                     242,
+            "unit":                     "W",
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_NUMBER_OF_MEASUREMENT_CHANNEL_DUPLEX": {
+            "value":                    "0xB8",
+            "EDT":                      "",
+            "range":                    ["0x01", "0xFC"],
+            "data_type":                "unsigned char",
+            "size":                     1,
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_CHANNEL_RANGE_SPECIFICATION_FOR_CUMULATIVE_POWER_CONSUMPTION_VALUE_DUPLEX": {
+            "value":                    "0xB9",
+            "EDT":                      "",
+            "range":                    [["0x01", "0xFC"], ["0x01", "0x3C"]],
+            "data_type":                "unsigned char",
+            "size":                     2,
+            "access":                   ["set", "get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_CUMULATIVE_POWER_CONSUMPTION_VALUE_LIST_DUPLEX": {
+            "value":                    "0xBA",
+            "EDT":                      "",
+            "range":                    [["0x01", "0xFC"], ["0x01", "0x3C"], ["0x00000000", "0x05F5E0FF"]],
+            "data_type":                ["unsigned char", "unsigned char", "unsigned long"],
+            "size":                     242,
+            "unit":                     "kWh",
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_CHANNEL_RANGE_SPECIFICATION_FOR_INSTANTANEOUS_CURRENT_VALUE_DUPLEX": {
+            "value":                    "0xBB",
+            "EDT":                      "",
+            "range":                    [["0x01", "0xFC"], ["0x01", "0x3C"]],
+            "data_type":                "unsigned char",
+            "size":                     2,
+            "access":                   ["set", "get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_INSTANTANEOUS_CURRENT_VALUE_LIST_DUPLEX": {
+            "value":                    "0xBC",
+            "EDT":                      "",
+            "range":                    [["0x01", "0xFC"], ["0x01", "0x3C"], ["0x8001", "0x7FFD"]],
+            "data_type":                ["unsigned char", "unsigned char", "unsigned short"],
+            "size":                     242,
+            "unit":                     "0.1 A",
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_CHANNEL_RANGE_SPECIFICATION_FOR_INSTANTANEOUS_POWER_CONSUMPTION_VALUE_DUPLEX": {
+            "value":                    "0xBD",
+            "EDT":                      "",
+            "range":                    [["0x01", "0xFC"], ["0x01", "0x3C"]],
+            "data_type":                "unsigned char",
+            "size":                     2,
+            "access":                   ["set", "get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_INSTANTANEOUS_POWER_CONSUMPTION_VALUE_LIST_DUPLEX": {
+            "value":                    "0xBE",
+            "EDT":                      "",
+            "range":                    [["0x01", "0xFC"], ["0x01", "0x3C"], ["0x80000001", "0x7FFFFFFD"]],
+            "data_type":                ["unsigned char", "unsigned char", "unsigned long"],
+            "size":                     242,
+            "unit":                     "W",
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        }
     },
     "CC_ELECTRICALLY_OPERATED_BLIND": {
         
@@ -1491,7 +1647,462 @@
         
     },
     "CC_DISTRIBUTION_PANEL_METERING": {
-        
+        "EPC_CUMULATIVE_ELECTRIC_ENERGY_NORMAL_DIRECTION_VALUE": {
+            "value":                    "0xC0",
+            "EDT":                      "",
+            "range":                    ["0x00000000", "0x05F5E0FF"],
+            "data_type":                "unsigned long",
+            "size":                     4,
+            "unit":                     "kWh",
+            "access":                   ["get"],
+            "mandatory":                ["get"],
+            "announce_status_change":   false
+        },
+        "EPC_CUMULATIVE_ELECTRIC_ENERGY_REVERSE_DIRECTION_VALUE": {
+            "value":                    "0xC1",
+            "EDT":                      "",
+            "range":                    ["0x00000000", "0x05F5E0FF"],
+            "data_type":                "unsigned long",
+            "size":                     4,
+            "unit":                     "kWh",
+            "access":                   ["get"],
+            "mandatory":                ["get"],
+            "announce_status_change":   false
+        },
+        "EPC_CUMULATIVE_ELECTRIC_ENERGY_VALUE_UNIT": {
+            "value":                    "0xC2",
+            "1 kWh":                    "0x00",
+            "0.1 kWh":                  "0x01",
+            "0.01 kWh":                 "0x02",
+            "0.001 kWh":                "0x03",
+            "0.0001 kWh":               "0x04",
+            "10 kWh":                   "0x0A",
+            "100 kWh":                  "0x0B",
+            "1000 kWh":                 "0x0C",
+            "10000 kWh":                "0x0D",
+            "data_type":                "unsigned char",
+            "size":                     1,
+            "access":                   ["get"],
+            "mandatory":                ["get"],
+            "announce_status_change":   false
+        },
+        "EPC_HISTORICAL_CUMULATIVE_ELECTRIC_ENERGY_NORMAL_DIRECTION_VALUE": {
+            "value":                    "0xC3",
+            "EDT":                      "",
+            "range":                    [["0x0000, 0x0063"], ["0x00000000", "0x05F5E0FF"]],
+            "data_type":                ["unsigned short", "unsigned long"],
+            "size":                     194,
+            "unit":                     "kWh",
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_HISTORICAL_CUMULATIVE_ELECTRIC_ENERGY_REVERSE_DIRECTION_VALUE": {
+            "value":                    "0xC4",
+            "EDT":                      "",
+            "range":                    [["0x0000, 0x0063"], ["0x00000000", "0x05F5E0FF"]],
+            "data_type":                ["unsigned short", "unsigned long"],
+            "size":                     194,
+            "unit":                     "kWh",
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_HISTORICAL_CUMULATIVE_ELECTRIC_ENERGY_VALUE_DAY": {
+            "value":                    "0xC5",
+            "EDT":                      "",
+            "range":                    [["0x00, 0x63"]],
+            "data_type":                ["unsigned char"],
+            "size":                     1,
+            "access":                   ["set", "get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_INSTANTANEOUS_ELECTRIC_ENERGY_VALUE": {
+            "value":                    "0xC6",
+            "EDT":                      "",
+            "range":                    ["0x80000001", "0x7FFFFFFD"],
+            "data_type":                "signed long",
+            "size":                     4,
+            "unit":                     "W",
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_INSTANTANEOUS_CURRENT_VALUE": {
+            "value":                    "0xC7",
+            "EDT":                      "",
+            "range":                    ["0x8001", "0x7FFD"],
+            "data_type":                "signed short",
+            "size":                     4,
+            "unit":                     "0.1 A",
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_INSTANTANEOUS_VOLTAGE_VALUE": {
+            "value":                    "0xC8",
+            "EDT":                      "",
+            "range":                    ["0x0000", "0xFFFD"],
+            "data_type":                "unsigned short",
+            "size":                     4,
+            "unit":                     "0.1 V",
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_MEASUREMENT_CHANNEL_1": {
+            "value":                    "0xD0",
+            "EDT":                      "",
+            "range":                    [["0x00000000", "0x05F5E0FF"], ["0x8001", "0x7FFD"]],
+            "data_type":                ["unsigned long", "signed short"],
+            "size":                     8,
+            "unit":                     ["kWh", "0.1 A"],
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_MEASUREMENT_CHANNEL_2": {
+            "value":                    "0xD1",
+            "EDT":                      "",
+            "range":                    [["0x00000000", "0x05F5E0FF"], ["0x8001", "0x7FFD"]],
+            "data_type":                ["unsigned long", "signed short"],
+            "size":                     8,
+            "unit":                     ["kWh", "0.1 A"],
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_MEASUREMENT_CHANNEL_3": {
+            "value":                    "0xD2",
+            "EDT":                      "",
+            "range":                    [["0x00000000", "0x05F5E0FF"], ["0x8001", "0x7FFD"]],
+            "data_type":                ["unsigned long", "signed short"],
+            "size":                     8,
+            "unit":                     ["kWh", "0.1 A"],
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_MEASUREMENT_CHANNEL_4": {
+            "value":                    "0xD3",
+            "EDT":                      "",
+            "range":                    [["0x00000000", "0x05F5E0FF"], ["0x8001", "0x7FFD"]],
+            "data_type":                ["unsigned long", "signed short"],
+            "size":                     8,
+            "unit":                     ["kWh", "0.1 A"],
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_MEASUREMENT_CHANNEL_5": {
+            "value":                    "0xD4",
+            "EDT":                      "",
+            "range":                    [["0x00000000", "0x05F5E0FF"], ["0x8001", "0x7FFD"]],
+            "data_type":                ["unsigned long", "signed short"],
+            "size":                     8,
+            "unit":                     ["kWh", "0.1 A"],
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_MEASUREMENT_CHANNEL_6": {
+            "value":                    "0xD5",
+            "EDT":                      "",
+            "range":                    [["0x00000000", "0x05F5E0FF"], ["0x8001", "0x7FFD"]],
+            "data_type":                ["unsigned long", "signed short"],
+            "size":                     8,
+            "unit":                     ["kWh", "0.1 A"],
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_MEASUREMENT_CHANNEL_7": {
+            "value":                    "0xD6",
+            "EDT":                      "",
+            "range":                    [["0x00000000", "0x05F5E0FF"], ["0x8001", "0x7FFD"]],
+            "data_type":                ["unsigned long", "signed short"],
+            "size":                     8,
+            "unit":                     ["kWh", "0.1 A"],
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_MEASUREMENT_CHANNEL_8": {
+            "value":                    "0xD7",
+            "EDT":                      "",
+            "range":                    [["0x00000000", "0x05F5E0FF"], ["0x8001", "0x7FFD"]],
+            "data_type":                ["unsigned long", "signed short"],
+            "size":                     8,
+            "unit":                     ["kWh", "0.1 A"],
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_MEASUREMENT_CHANNEL_9": {
+            "value":                    "0xD8",
+            "EDT":                      "",
+            "range":                    [["0x00000000", "0x05F5E0FF"], ["0x8001", "0x7FFD"]],
+            "data_type":                ["unsigned long", "signed short"],
+            "size":                     8,
+            "unit":                     ["kWh", "0.1 A"],
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_MEASUREMENT_CHANNEL_10": {
+            "value":                    "0xD9",
+            "EDT":                      "",
+            "range":                    [["0x00000000", "0x05F5E0FF"], ["0x8001", "0x7FFD"]],
+            "data_type":                ["unsigned long", "signed short"],
+            "size":                     8,
+            "unit":                     ["kWh", "0.1 A"],
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_MEASUREMENT_CHANNEL_11": {
+            "value":                    "0xDA",
+            "EDT":                      "",
+            "range":                    [["0x00000000", "0x05F5E0FF"], ["0x8001", "0x7FFD"]],
+            "data_type":                ["unsigned long", "signed short"],
+            "size":                     8,
+            "unit":                     ["kWh", "0.1 A"],
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_MEASUREMENT_CHANNEL_12": {
+            "value":                    "0xDB",
+            "EDT":                      "",
+            "range":                    [["0x00000000", "0x05F5E0FF"], ["0x8001", "0x7FFD"]],
+            "data_type":                ["unsigned long", "signed short"],
+            "size":                     8,
+            "unit":                     ["kWh", "0.1 A"],
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_MEASUREMENT_CHANNEL_13": {
+            "value":                    "0xDC",
+            "EDT":                      "",
+            "range":                    [["0x00000000", "0x05F5E0FF"], ["0x8001", "0x7FFD"]],
+            "data_type":                ["unsigned long", "signed short"],
+            "size":                     8,
+            "unit":                     ["kWh", "0.1 A"],
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_MEASUREMENT_CHANNEL_14": {
+            "value":                    "0xDD",
+            "EDT":                      "",
+            "range":                    [["0x00000000", "0x05F5E0FF"], ["0x8001", "0x7FFD"]],
+            "data_type":                ["unsigned long", "signed short"],
+            "size":                     8,
+            "unit":                     ["kWh", "0.1 A"],
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_MEASUREMENT_CHANNEL_15": {
+            "value":                    "0xDE",
+            "EDT":                      "",
+            "range":                    [["0x00000000", "0x05F5E0FF"], ["0x8001", "0x7FFD"]],
+            "data_type":                ["unsigned long", "signed short"],
+            "size":                     8,
+            "unit":                     ["kWh", "0.1 A"],
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_MEASUREMENT_CHANNEL_16": {
+            "value":                    "0xDF",
+            "EDT":                      "",
+            "range":                    [["0x00000000", "0x05F5E0FF"], ["0x8001", "0x7FFD"]],
+            "data_type":                ["unsigned long", "signed short"],
+            "size":                     8,
+            "unit":                     ["kWh", "0.1 A"],
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_MEASUREMENT_CHANNEL_17": {
+            "value":                    "0xE0",
+            "EDT":                      "",
+            "range":                    [["0x00000000", "0x05F5E0FF"], ["0x8001", "0x7FFD"]],
+            "data_type":                ["unsigned long", "signed short"],
+            "size":                     8,
+            "unit":                     ["kWh", "0.1 A"],
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_MEASUREMENT_CHANNEL_18": {
+            "value":                    "0xE1",
+            "EDT":                      "",
+            "range":                    [["0x00000000", "0x05F5E0FF"], ["0x8001", "0x7FFD"]],
+            "data_type":                ["unsigned long", "signed short"],
+            "size":                     8,
+            "unit":                     ["kWh", "0.1 A"],
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_MEASUREMENT_CHANNEL_19": {
+            "value":                    "0xE2",
+            "EDT":                      "",
+            "range":                    [["0x00000000", "0x05F5E0FF"], ["0x8001", "0x7FFD"]],
+            "data_type":                ["unsigned long", "signed short"],
+            "size":                     8,
+            "unit":                     ["kWh", "0.1 A"],
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_MEASUREMENT_CHANNEL_20": {
+            "value":                    "0xE3",
+            "EDT":                      "",
+            "range":                    [["0x00000000", "0x05F5E0FF"], ["0x8001", "0x7FFD"]],
+            "data_type":                ["unsigned long", "signed short"],
+            "size":                     8,
+            "unit":                     ["kWh", "0.1 A"],
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_MEASUREMENT_CHANNEL_21": {
+            "value":                    "0xE4",
+            "EDT":                      "",
+            "range":                    [["0x00000000", "0x05F5E0FF"], ["0x8001", "0x7FFD"]],
+            "data_type":                ["unsigned long", "signed short"],
+            "size":                     8,
+            "unit":                     ["kWh", "0.1 A"],
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_MEASUREMENT_CHANNEL_22": {
+            "value":                    "0xE5",
+            "EDT":                      "",
+            "range":                    [["0x00000000", "0x05F5E0FF"], ["0x8001", "0x7FFD"]],
+            "data_type":                ["unsigned long", "signed short"],
+            "size":                     8,
+            "unit":                     ["kWh", "0.1 A"],
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_MEASUREMENT_CHANNEL_23": {
+            "value":                    "0xE6",
+            "EDT":                      "",
+            "range":                    [["0x00000000", "0x05F5E0FF"], ["0x8001", "0x7FFD"]],
+            "data_type":                ["unsigned long", "signed short"],
+            "size":                     8,
+            "unit":                     ["kWh", "0.1 A"],
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_MEASUREMENT_CHANNEL_24": {
+            "value":                    "0xE7",
+            "EDT":                      "",
+            "range":                    [["0x00000000", "0x05F5E0FF"], ["0x8001", "0x7FFD"]],
+            "data_type":                ["unsigned long", "signed short"],
+            "size":                     8,
+            "unit":                     ["kWh", "0.1 A"],
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_MEASUREMENT_CHANNEL_25": {
+            "value":                    "0xE*",
+            "EDT":                      "",
+            "range":                    [["0x00000000", "0x05F5E0FF"], ["0x8001", "0x7FFD"]],
+            "data_type":                ["unsigned long", "signed short"],
+            "size":                     8,
+            "unit":                     ["kWh", "0.1 A"],
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_MEASUREMENT_CHANNEL_26": {
+            "value":                    "0xE9",
+            "EDT":                      "",
+            "range":                    [["0x00000000", "0x05F5E0FF"], ["0x8001", "0x7FFD"]],
+            "data_type":                ["unsigned long", "signed short"],
+            "size":                     8,
+            "unit":                     ["kWh", "0.1 A"],
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_MEASUREMENT_CHANNEL_27": {
+            "value":                    "0xEA",
+            "EDT":                      "",
+            "range":                    [["0x00000000", "0x05F5E0FF"], ["0x8001", "0x7FFD"]],
+            "data_type":                ["unsigned long", "signed short"],
+            "size":                     8,
+            "unit":                     ["kWh", "0.1 A"],
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_MEASUREMENT_CHANNEL_28": {
+            "value":                    "0xEB",
+            "EDT":                      "",
+            "range":                    [["0x00000000", "0x05F5E0FF"], ["0x8001", "0x7FFD"]],
+            "data_type":                ["unsigned long", "signed short"],
+            "size":                     8,
+            "unit":                     ["kWh", "0.1 A"],
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_MEASUREMENT_CHANNEL_29": {
+            "value":                    "0xEC",
+            "EDT":                      "",
+            "range":                    [["0x00000000", "0x05F5E0FF"], ["0x8001", "0x7FFD"]],
+            "data_type":                ["unsigned long", "signed short"],
+            "size":                     8,
+            "unit":                     ["kWh", "0.1 A"],
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_MEASUREMENT_CHANNEL_30": {
+            "value":                    "0xED",
+            "EDT":                      "",
+            "range":                    [["0x00000000", "0x05F5E0FF"], ["0x8001", "0x7FFD"]],
+            "data_type":                ["unsigned long", "signed short"],
+            "size":                     8,
+            "unit":                     ["kWh", "0.1 A"],
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_MEASUREMENT_CHANNEL_31": {
+            "value":                    "0xEE",
+            "EDT":                      "",
+            "range":                    [["0x00000000", "0x05F5E0FF"], ["0x8001", "0x7FFD"]],
+            "data_type":                ["unsigned long", "signed short"],
+            "size":                     8,
+            "unit":                     ["kWh", "0.1 A"],
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        },
+        "EPC_MEASUREMENT_CHANNEL_32": {
+            "value":                    "0xEF",
+            "EDT":                      "",
+            "range":                    [["0x00000000", "0x05F5E0FF"], ["0x8001", "0x7FFD"]],
+            "data_type":                ["unsigned long", "signed short"],
+            "size":                     8,
+            "unit":                     ["kWh", "0.1 A"],
+            "access":                   ["get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        }
     },
     "CC_LOW_VOLTAGE_SMART_ELECTRIC_ENERGY_METER": {
         
@@ -1657,7 +2268,15 @@
         
     },
     "CC_SWITCH": {
-        
+        "EPC_CONNECTED_DEVICE": {
+            "value":                    "0xE0",
+            "EDT":                      "",
+            "data_type":                ["unsigned char", "signed short"],
+            "size":                     12,
+            "access":                   ["set", "get"],
+            "mandatory":                [],
+            "announce_status_change":   false
+        }
     },
     "CC_PORTABLE_TERMINAL": {
         
