@@ -137,7 +137,7 @@
         "EPC_PRODUCTION_DATE": {
             "value":                    "0x8E",
             "EDT":                      "",
-            "range":                    [["0x01", "0x270F"], ["0x01", "0x0C"], ["0x01", "0x1F"]],
+            "range":                    [["0x0001", "0x270F"], ["0x01", "0x0C"], ["0x01", "0x1F"]],
             "data_type":                "unsigned char",
             "size":                     4,
             "access":                   ["get"],
@@ -179,7 +179,7 @@
         "EPC_CURRENT_DATE_SETTING": {
             "value":                    "0x98",
             "EDT":                      "",
-            "range":                    [["0x01", "0x270F"], ["0x01", "0x0C"], ["0x01", "0x1F"]],
+            "range":                    [["0x0001", "0x270F"], ["0x01", "0x0C"], ["0x01", "0x1F"]],
             "data_type":                "unsigned char",
             "size":                     4,
             "access":                   ["set", "get"],
@@ -1408,7 +1408,7 @@
             "range":                    [["0x01", "0xFC"], ["0x01", "0x3C"], ["0x00000000", "0x05F5E0FF"]],
             "data_type":                ["unsigned char", "unsigned char", "unsigned long"],
             "size":                     242,
-            "unit":                     "kWh",
+            "unit":                     ["", "", "kWh"],
             "access":                   ["get"],
             "mandatory":                [],
             "announce_status_change":   false
@@ -1429,7 +1429,7 @@
             "range":                    [["0x01", "0xFC"], ["0x01", "0x3C"], ["0x8001", "0x7FFD"]],
             "data_type":                ["unsigned char", "unsigned char", "unsigned short"],
             "size":                     242,
-            "unit":                     "0.1 A",
+            "unit":                     ["", "", "0.1 A"],
             "access":                   ["get"],
             "mandatory":                [],
             "announce_status_change":   false
@@ -1450,7 +1450,7 @@
             "range":                    [["0x01", "0xFC"], ["0x01", "0x3C"], ["0x80000001", "0x7FFFFFFD"]],
             "data_type":                ["unsigned char", "unsigned char", "unsigned long"],
             "size":                     242,
-            "unit":                     "W",
+            "unit":                     ["", "", "W"],
             "access":                   ["get"],
             "mandatory":                [],
             "announce_status_change":   false
@@ -1481,7 +1481,7 @@
             "range":                    [["0x01", "0xFC"], ["0x01", "0x3C"], ["0x00000000", "0x05F5E0FF"]],
             "data_type":                ["unsigned char", "unsigned char", "unsigned long"],
             "size":                     242,
-            "unit":                     "kWh",
+            "unit":                     ["", "", "kWh"],
             "access":                   ["get"],
             "mandatory":                [],
             "announce_status_change":   false
@@ -1502,7 +1502,7 @@
             "range":                    [["0x01", "0xFC"], ["0x01", "0x3C"], ["0x8001", "0x7FFD"]],
             "data_type":                ["unsigned char", "unsigned char", "unsigned short"],
             "size":                     242,
-            "unit":                     "0.1 A",
+            "unit":                     ["", "", "0.1 A"],
             "access":                   ["get"],
             "mandatory":                [],
             "announce_status_change":   false
@@ -1523,7 +1523,7 @@
             "range":                    [["0x01", "0xFC"], ["0x01", "0x3C"], ["0x80000001", "0x7FFFFFFD"]],
             "data_type":                ["unsigned char", "unsigned char", "unsigned long"],
             "size":                     242,
-            "unit":                     "W",
+            "unit":                     ["", "", "W"],
             "access":                   ["get"],
             "mandatory":                [],
             "announce_status_change":   false
@@ -1671,17 +1671,18 @@
         },
         "EPC_CUMULATIVE_ELECTRIC_ENERGY_VALUE_UNIT": {
             "value":                    "0xC2",
-            "1 kWh":                    "0x00",
-            "0.1 kWh":                  "0x01",
-            "0.01 kWh":                 "0x02",
-            "0.001 kWh":                "0x03",
-            "0.0001 kWh":               "0x04",
-            "10 kWh":                   "0x0A",
-            "100 kWh":                  "0x0B",
-            "1000 kWh":                 "0x0C",
-            "10000 kWh":                "0x0D",
+            "1":                        "0x00",
+            "0.1":                      "0x01",
+            "0.01":                     "0x02",
+            "0.001":                    "0x03",
+            "0.0001":                   "0x04",
+            "10":                       "0x0A",
+            "100":                      "0x0B",
+            "1000":                     "0x0C",
+            "10000":                    "0x0D",
             "data_type":                "unsigned char",
             "size":                     1,
+            "unit":                     "kWh",
             "access":                   ["get"],
             "mandatory":                ["get"],
             "announce_status_change":   false
@@ -1692,7 +1693,7 @@
             "range":                    [["0x0000, 0x0063"], ["0x00000000", "0x05F5E0FF"]],
             "data_type":                ["unsigned short", "unsigned long"],
             "size":                     194,
-            "unit":                     "kWh",
+            "unit":                     ["", "kWh"],
             "access":                   ["get"],
             "mandatory":                [],
             "announce_status_change":   false
@@ -1703,7 +1704,7 @@
             "range":                    [["0x0000, 0x0063"], ["0x00000000", "0x05F5E0FF"]],
             "data_type":                ["unsigned short", "unsigned long"],
             "size":                     194,
-            "unit":                     "kWh",
+            "unit":                     ["kWh", "kWh"],
             "access":                   ["get"],
             "mandatory":                [],
             "announce_status_change":   false

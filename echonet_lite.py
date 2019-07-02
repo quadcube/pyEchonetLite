@@ -26,7 +26,7 @@ fd = None       # stores echonet_lite_FD.json as dict
 class EchonetLite():
     def __init__(self):
         global ehd, eoj_cgc, eoj_cc, esv, epc, epc_edt, il, fd
-        MAX_ECHONET_PACKET_LEN = 64
+        MAX_ECHONET_PACKET_LEN = 500
         self.current_echonet_packet_len = 0
         self.echonet_packet = [0] * MAX_ECHONET_PACKET_LEN # pre-allocate echonet lite packet structure
         if ehd == None: self.initEchonetLite()
@@ -321,49 +321,74 @@ class EchonetLite():
                     epc_str = self.dictTraverse(epc_edt, search=[epc_cgc_str, epc_num], key=True)
                     edt = self.getnEDT(i+1) # get EDT list
                     data_type = epc_edt[cgc_epc_str][epc_cgc_str]["data_type"] # get data type for data concatenate or conversion
+                    if not isinstance(data_type, list): data_type = [data_type] # make sure its a list
                     try: unit = epc_edt[cgc_epc_str][epc_cgc_str]["unit"] # get unit for data conversion
                     except: unit = None
-                    if data_type == 'unsigned char': # no conversion needed
-                        for j in range(len(edt)):
-                            char_value = self.dictTraverse(epc_edt, search=[cgc_epc_str, epc_cgc_str, edt[j]], key=True) if raw_value == False else edt[j]
-                            if raw_value == False and char_value == 'EDT': char_value = edt[j] # handle cases where key is EDT, return raw value
-                            if unit is not None and value_only == False: char_value = str(char_value) + " " + unit.split()[1] if (unit[0].isdigit() and raw_value == False) else str(char_value) + " " + unit # convert to str + unit
-                            if value_only == False: temp_return_value.append((epc_cgc_str, char_value))
-                            else: temp_return_value.append(char_value)
-                    elif data_type == 'signed char': # convert to signed. no need to convert based on unit as they won't be some float values
-                        for j in range(len(edt)):
-                            char_value = edt[j]
-                            if raw_value == False: char_value = char_value if char_value < (1 << 8-1) else char_value - (1 << 8)
-                            if unit is not None and value_only == False: char_value = str(char_value) + " " + unit.split()[1] if (unit[0].isdigit() and raw_value == False) else str(char_value) + " " + unit # convert to str + unit
-                            if value_only == False: temp_return_value.append((epc_cgc_str, char_value))
-                            else: temp_return_value.append(char_value)
-                    elif data_type == 'unsigned short' or data_type == 'signed short': # convert to int or float (list if needed)
-                        for j in range(int(len(edt)/2)):
-                            short_value = edt[(j*2)] << 8 | edt[(j*2)+1] & 0xFF
-                            if data_type == 'signed short' and raw_value == False: short_value = short_value if short_value < (1 << 16-1) else short_value - (1 << 16)
-                            if unit is not None and raw_value == False: # if unit property exist in EPC, convert
-                                try:
-                                    unit_only = float(unit.split()[0]) if '.' in unit else int(unit.split()[0]) # try to find int or float
-                                    short_value = float(short_value) * unit_only # apply unit to the value
-                                except: pass
-                            if unit is not None and value_only == False: short_value = str(short_value) + " " + unit.split()[1] if (unit[0].isdigit() and raw_value == False) else str(short_value) + " " + unit # convert to str + unit
-                            if value_only == False: temp_return_value.append((epc_cgc_str, short_value))
-                            else: temp_return_value.append(short_value)
-                    elif data_type == 'unsigned long' or data_type == 'signed long': # convert to int or float (list if needed)
-                        for j in range(int(len(edt)/4)):
-                            long_value = edt[(j*4)] << 24 | edt[(j*4)+1] << 16 | edt[(j*4)+2] << 8 | edt[(j*4)+3] & 0xFF
-                            if data_type == 'signed long' and raw_value == False: long_value = long_value if long_value < (1 << 32-1) else long_value - (1 << 32)
-                            if unit is not None and raw_value == False: # if unit property exist in EPC, convert
-                                try:
-                                    unit_only = float(unit.split()[0]) if '.' in unit else int(unit.split()[0]) # try to find int or float
-                                    long_value = float(long_value) * unit_only # apply unit to the value
-                                except: pass
-                            if unit is not None and value_only == False: long_value = str(long_value) + " " + unit.split()[1] if (unit[0].isdigit() and raw_value == False) else str(long_value) + " " + unit # convert to str + unit
-                            if value_only == False: temp_return_value.append((epc_cgc_str, long_value))
-                            else: temp_return_value.append(long_value)
-                    else:
-                        logging.error("parsePacket() data_type {} undefined in function.".format(data_type))
-                        return -1
+                    if not isinstance(unit, list): unit = [unit] # make sure its a list
+                    multi_same_data_type = False # usually EDT that has multiple values of the same data type are at the last, e.g. distribution meter channel 1 (unsigned long, signed short x2)
+                    edt_list_counter = 0
+                    for j in range(len(data_type)): # handle multi data_type
+                        if j == len(data_type) - 1: multi_same_data_type = True # the last data_type might be multiple of the same data_type
+                        if data_type[j] == 'unsigned char': # no conversion needed
+                            for k in range(edt_list_counter, len(edt)):
+                                if raw_value == False:
+                                    char_value = self.dictTraverse(epc_edt, search=[cgc_epc_str, epc_cgc_str, edt[k]], key=True) # search for value's key, might output None for EDT value e.g.: 'on'=0x30
+                                    try: char_value = int(char_value) # try convert integer based string key into int
+                                    except: pass
+                                    try: char_value = float(char_value) # try convert floating based string key into float, e.g.: '0.001'=0x03 distribution panel metering
+                                    except: pass
+                                else: char_value = edt[k]
+                                if raw_value == False and (char_value == 'EDT' or char_value == None): char_value = edt[k] # handle cases where key is 'EDT' or char_value is None, return raw value
+                                if unit[j] is not None and len(unit[j]) != 0 and value_only == False: char_value = str(char_value) + " " + unit[j].split()[1] if (unit[j][0].isdigit() and raw_value == False) else str(char_value) + " " + unit[j] # convert to str + unit
+                                if value_only == False: temp_return_value.append((epc_cgc_str, char_value))
+                                else: temp_return_value.append(char_value)
+                                if multi_same_data_type == False:
+                                    edt_list_counter += 1
+                                    break
+                        elif data_type[j] == 'signed char': # convert to signed. no need to convert based on unit as they won't be some float values
+                            for k in range(edt_list_counter, len(edt)):
+                                char_value = edt[k]
+                                if raw_value == False: char_value = char_value if char_value < (1 << 8-1) else char_value - (1 << 8)
+                                if unit[j] is not None and len(unit[j]) != 0 and value_only == False: char_value = str(char_value) + " " + unit[j].split()[1] if (unit[j][0].isdigit() and raw_value == False) else str(char_value) + " " + unit[j] # convert to str + unit
+                                if value_only == False: temp_return_value.append((epc_cgc_str, char_value))
+                                else: temp_return_value.append(char_value)
+                                if multi_same_data_type == False:
+                                    edt_list_counter += 1
+                                    break
+                        elif data_type[j] == 'unsigned short' or data_type[j] == 'signed short': # convert to int or float (list if needed)
+                            for k in range(edt_list_counter, int((len(edt) + edt_list_counter)/2)):
+                                short_value = edt[edt_list_counter+((k-edt_list_counter)*2)] << 8 | edt[edt_list_counter+((k-edt_list_counter)*2)+1] & 0xFF
+                                if data_type == 'signed short' and raw_value == False: short_value = short_value if short_value < (1 << 16-1) else short_value - (1 << 16)
+                                if unit[j] is not None and len(unit[j]) != 0 and raw_value == False: # if unit property exist in EPC, convert
+                                    try:
+                                        unit_only = float(unit[j].split()[0]) if '.' in unit[j] else int(unit[j].split()[0]) # try to find int or float
+                                        short_value = float(short_value) * unit_only # apply unit to the value
+                                    except: pass
+                                if unit[j] is not None and len(unit[j]) != 0 and value_only == False: short_value = str(short_value) + " " + unit[j].split()[1] if (unit[j][0].isdigit() and raw_value == False) else str(short_value) + " " + unit[j] # convert to str + unit
+                                if value_only == False: temp_return_value.append((epc_cgc_str, short_value))
+                                else: temp_return_value.append(short_value)
+                                if multi_same_data_type == False:
+                                    edt_list_counter += 2
+                                    break
+                        elif data_type[j] == 'unsigned long' or data_type[j] == 'signed long': # convert to int or float (list if needed)
+                            for k in range(edt_list_counter, int((len(edt) + edt_list_counter)/4)):
+                                long_value = edt[edt_list_counter+((k-edt_list_counter)*4)] << 24 | edt[edt_list_counter+((k-edt_list_counter)*4)+1] << 16 | edt[edt_list_counter+((k-edt_list_counter)*4)+2] << 8 | edt[edt_list_counter+((k-edt_list_counter)*4)+3] & 0xFF
+                                if data_type == 'signed long' and raw_value == False: long_value = long_value if long_value < (1 << 32-1) else long_value - (1 << 32)
+                                if unit[j] is not None and len(unit[j]) != 0 and raw_value == False: # if unit property exist in EPC, convert
+                                    try:
+                                        unit_only = float(unit[j].split()[0]) if '.' in unit[j] else int(unit[j].split()[0]) # try to find int or float
+                                        long_value = float(long_value) * unit_only # apply unit to the value
+                                    except: pass
+                                if unit[j] is not None and len(unit[j]) != 0 and value_only == False: long_value = str(long_value) + " " + unit[j].split()[1] if (unit[j][0].isdigit() and raw_value == False) else str(long_value) + " " + unit[j] # convert to str + unit
+                                if value_only == False: temp_return_value.append((epc_cgc_str, long_value))
+                                else: temp_return_value.append(long_value)
+                                if multi_same_data_type == False:
+                                    edt_list_counter += 4
+                                    break
+                        else:
+                            logging.error("parsePacket() data_type {} undefined in function.".format(data_type))
+                            return -1
+            
                     if len(temp_return_value) == 1: return_value.append(temp_return_value[0]) # unpack list
                     else: return_value.append(temp_return_value) # return whole list
                 if class_info == False:
@@ -482,7 +507,7 @@ class testEchonetLite(unittest.TestCase):
         self.assertEqual(self.obj.createPacket("CC_TEMPERATURE_SENSOR", EPC=[0x80, 0xE0]), [0x10, 0x81, 0x00, 0x00, 0x0E, 0xF0, 0x01, 0x00, 0x11, 0x01, 0x62, 0x02, 0x80, 0, 0xE0, 0])
 
     def test_parsePacket(self):
-        test_packet = [0x10, 0x81, 0x00, 0x00, 0x00, 0x11, 0x01, 0x0E, 0xF0, 0x01, 0x72, 0x02, 0x80, 0x01, 0x30, 0xE0, 0x02, 0x00, 0xEB]
+        test_packet = [0x10, 0x81, 0x00, 0x00, 0x00, 0x11, 0x01, 0x0E, 0xF0, 0x01, 0x72, 0x02, 0x80, 0x01, 0x30, 0xE0, 0x02, 0x00, 0xEB] # temperature sensor
         self.assertEqual(self.obj.parsePacket(test_packet), ['on', 23.5])
         self.assertEqual(self.obj.parsePacket(test_packet, raw_value=True), [0x30, 0xEB])
         self.assertEqual(self.obj.parsePacket(test_packet, value_only=False), [('EPC_OPERATIONAL_STATUS', 'on'), ('EPC_TEMPERATURE_VALUE', '23.5 Celsius')])
@@ -490,6 +515,17 @@ class testEchonetLite(unittest.TestCase):
         self.assertEqual(self.obj.parsePacket(test_packet, class_info=True), ['CGC_SENSOR_RELATED', 'CC_TEMPERATURE_SENSOR', ['on', 23.5]])
         self.assertEqual(self.obj.parsePacket(test_packet, value_only=False, class_info=True), ['CGC_SENSOR_RELATED', 'CC_TEMPERATURE_SENSOR', [('EPC_OPERATIONAL_STATUS', 'on'), ('EPC_TEMPERATURE_VALUE', '23.5 Celsius')]])
         self.assertEqual(self.obj.parsePacket(test_packet, value_only=False, raw_value=True , class_info=True), ['CGC_SENSOR_RELATED', 'CC_TEMPERATURE_SENSOR', [('EPC_OPERATIONAL_STATUS', 48), ('EPC_TEMPERATURE_VALUE', '235 0.1 Celsius')]])
-                         
+        test_packet = [0x10, 0x81, 0x00, 0x00, 0x02, 0x87, 0x01, 0x0E, 0xF0, 0x01, 0x72, 0x02, 0xC2, 0x01, 0x03, 0xD2, 0x08, 0x00, 0x0A, 0xC4, 0x7C, 0x00, 0x00, 0x00, 0x00, 0x00] # distribution panel metering
+        self.assertEqual(self.obj.parsePacket(test_packet), [0.001, [705660, 0.0, 0.0]])
+        self.assertEqual(self.obj.parsePacket(test_packet, raw_value=True), [0x03, [0x0AC47C, 0x00, 0x00]])
+        self.assertEqual(self.obj.parsePacket(test_packet, raw_value=False, class_info=True, value_only=True), ['CGC_HOUSING_RELATED', 'CC_DISTRIBUTION_PANEL_METERING', [0.001, [705660, 0.0, 0.0]]])
+        self.assertEqual(self.obj.parsePacket(test_packet, raw_value=False, class_info=True, value_only=False), ['CGC_HOUSING_RELATED', 'CC_DISTRIBUTION_PANEL_METERING', [('EPC_CUMULATIVE_ELECTRIC_ENERGY_VALUE_UNIT', '0.001 kWh'), [('EPC_MEASUREMENT_CHANNEL_3', '705660 kWh'), ('EPC_MEASUREMENT_CHANNEL_3', '0.0 A'), ('EPC_MEASUREMENT_CHANNEL_3', '0.0 A')]]])
+        test_packet = [16, 129, 0, 0, 2, 135, 1, 14, 240, 1, 114, 1, 195, 194, 0, 0, 1, 96, 231, 194, 1, 96, 232, 213, 1, 96, 233, 231, 1, 96, 234, 229, 1, 96, 235, 235, 1, 96, 236, 245, 1, 96, 238, 5, 1, 96, 239, 10, 1, 96, 240, 12, 1, 96, 241, 7, 1, 96, 242, 11, 1, 96, 243, 13, 1, 96, 244, 23, 1, 96, 245, 11, 1, 96, 245, 209, 1, 96, 246, 66, 1, 96, 246, 83, 1, 96, 246, 83, 1, 96, 246, 83, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254] # distribution panel metering "EPC_HISTORICAL_CUMULATIVE_ELECTRIC_ENERGY_NORMAL_DIRECTION_VALUE", test multiple unsigned long
+        self.assertEqual(self.obj.parsePacket(test_packet), [0x00, 0x0160E7C2, 0x0160E8D5, 0x0160E9E7, 0x0160EAE5, 0x0160EBEB, 0x0160ECF5, 0x0160EE05, 0x0160EF0A, 0x0160F00C, 0x0160F107, 0x0160F20B, 0x0160F30D, 0x0160F417, 0x0160F50B, 0x0160F5D1, 0x0160F642, 0x0160F653, 0x0160F653, 0x0160F653, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE]) # No data: 0xFF/0xFFFFFFFE
+        print(self.obj.parsePacket(test_packet, value_only=False, class_info=True))
+        test_packet = [16, 129, 0, 0, 2, 135, 1, 14, 240, 1, 114, 1, 158, 16, 15, 129, 151, 152, 197, 241, 242, 243, 244, 245, 247, 248, 249, 253, 254, 255] # distribution panel metering "EPC_SET_PROPERTY_MAP", test multiple unsigned char
+        self.assertEqual(self.obj.parsePacket(test_packet, value_only=False, class_info=True), ['CGC_HOUSING_RELATED', 'CC_DISTRIBUTION_PANEL_METERING', ['CGC_HOUSING_RELATED', 'CC_DISTRIBUTION_PANEL_METERING', [('EPC_SET_PROPERTY_MAP', 15), ('EPC_SET_PROPERTY_MAP', 129), ('EPC_SET_PROPERTY_MAP', 151), ('EPC_SET_PROPERTY_MAP', 152), ('EPC_SET_PROPERTY_MAP', 197), ('EPC_SET_PROPERTY_MAP', 241), ('EPC_SET_PROPERTY_MAP', 242), ('EPC_SET_PROPERTY_MAP', 243), ('EPC_SET_PROPERTY_MAP', 244), ('EPC_SET_PROPERTY_MAP', 245), ('EPC_SET_PROPERTY_MAP', 247), ('EPC_SET_PROPERTY_MAP', 248), ('EPC_SET_PROPERTY_MAP', 249), ('EPC_SET_PROPERTY_MAP', 253), ('EPC_SET_PROPERTY_MAP', 254), ('EPC_SET_PROPERTY_MAP', 255)]]])
+
+
 if __name__ == '__main__':
     unittest.main()
