@@ -369,7 +369,7 @@ class EchonetLite():
                                 if unit[j] is not None and len(unit[j]) != 0 and raw_value == False: # if unit property exist in EPC, convert
                                     try:
                                         unit_only = float(unit[j].split()[0]) if '.' in unit[j] else int(unit[j].split()[0]) # try to find int or float
-                                        short_value = float(short_value) * unit_only # apply unit to the value
+                                        short_value = round(float(short_value) * unit_only, len(str(unit_only)) - 2) if isinstance(unit_only, float) else short_value * unit_only # apply unit to the value, round to the number of decimal according to the unit
                                     except: pass
                                 if unit[j] is not None and len(unit[j]) != 0 and value_only == False: short_value = str(short_value) + " " + unit[j].split()[1] if (unit[j][0].isdigit() and raw_value == False) else str(short_value) + " " + unit[j] # convert to str + unit
                                 if value_only == False: temp_return_value.append((epc_cgc_str, short_value))
@@ -384,7 +384,7 @@ class EchonetLite():
                                 if unit[j] is not None and len(unit[j]) != 0 and raw_value == False: # if unit property exist in EPC, convert
                                     try:
                                         unit_only = float(unit[j].split()[0]) if '.' in unit[j] else int(unit[j].split()[0]) # try to find int or float
-                                        long_value = float(long_value) * unit_only # apply unit to the value
+                                        long_value = round(float(long_value), len(str(unit_only)) - 2) if isinstance(unit_only, float) else long_value * unit_only # apply unit to the value, round to the number of decimal according to the unit
                                     except: pass
                                 if unit[j] is not None and len(unit[j]) != 0 and value_only == False: long_value = str(long_value) + " " + unit[j].split()[1] if (unit[j][0].isdigit() and raw_value == False) else str(long_value) + " " + unit[j] # convert to str + unit
                                 if value_only == False: temp_return_value.append((epc_cgc_str, long_value))
@@ -400,10 +400,10 @@ class EchonetLite():
                     else: return_value.append(temp_return_value) # return whole list
                 if SEOJ_IC == True:
                     if len(return_value) == 1: return_value = [('IC', self.echonet_packet[6]), return_value[0]] # get SEOJ_IC and append to the front
-                    return_value = [('IC', self.echonet_packet[6]), return_value]
+                    else: return_value = [('IC', self.echonet_packet[6]), return_value]
                 if class_info == True:
                     if len(return_value) == 1: return_value = [cgc_str, cc_str, return_value[0]] # finally, unpack list
-                    return_value = [cgc_str, cc_str] + return_value if SEOJ_IC == True else [cgc_str, cc_str, return_value]
+                    else: return_value = [cgc_str, cc_str] + return_value if SEOJ_IC == True else [cgc_str, cc_str, return_value]
                 if len(return_value) == 1: return_value = return_value[0] # finally, unpack list
                 return return_value # finally return the values
             else:
@@ -420,6 +420,7 @@ class EchonetLite():
 """
 class testEchonetLite(unittest.TestCase):
     def setUp(self): # populate global var with sample header, OPC = 3
+        self.maxDiff = None # show all diff of the test units
         self.obj = EchonetLite()
         self.obj.echonet_packet[:] = [0 for _ in self.obj.echonet_packet[:]] # reset global var
         self.sample = [0x10, 0x81, 0x00, 0x01, 0x0E, 0xF0, 0x01, 0x00, 0x11, 0x01, 0x62, 3]
@@ -526,6 +527,7 @@ class testEchonetLite(unittest.TestCase):
         self.assertEqual(self.obj.parsePacket(test_packet, value_only=False, raw_value=True), [('EPC_OPERATIONAL_STATUS', 48), ('EPC_TEMPERATURE_VALUE', '235 0.1 Celsius')])
         self.assertEqual(self.obj.parsePacket(test_packet, class_info=True), ['CGC_SENSOR_RELATED', 'CC_TEMPERATURE_SENSOR', ['on', 23.5]])
         self.assertEqual(self.obj.parsePacket(test_packet, value_only=False, class_info=True), ['CGC_SENSOR_RELATED', 'CC_TEMPERATURE_SENSOR', [('EPC_OPERATIONAL_STATUS', 'on'), ('EPC_TEMPERATURE_VALUE', '23.5 Celsius')]])
+        self.assertEqual(self.obj.parsePacket(test_packet, class_info=True, SEOJ_IC=True), ['CGC_SENSOR_RELATED', 'CC_TEMPERATURE_SENSOR', ('IC', 1), ['on', 23.5]]) # test appending SEOJ_IC
         self.assertEqual(self.obj.parsePacket(test_packet, value_only=False, class_info=True, SEOJ_IC=True), ['CGC_SENSOR_RELATED', 'CC_TEMPERATURE_SENSOR', ('IC', 1), [('EPC_OPERATIONAL_STATUS', 'on'), ('EPC_TEMPERATURE_VALUE', '23.5 Celsius')]]) # test appending SEOJ_IC
         self.assertEqual(self.obj.parsePacket(test_packet, value_only=False, raw_value=True , class_info=True), ['CGC_SENSOR_RELATED', 'CC_TEMPERATURE_SENSOR', [('EPC_OPERATIONAL_STATUS', 48), ('EPC_TEMPERATURE_VALUE', '235 0.1 Celsius')]])
         test_packet = [0x10, 0x81, 0x00, 0x00, 0x02, 0x87, 0x01, 0x0E, 0xF0, 0x01, 0x72, 0x02, 0xC2, 0x01, 0x03, 0xD2, 0x08, 0x00, 0x0A, 0xC4, 0x7C, 0x00, 0x00, 0x00, 0x00, 0x00] # distribution panel metering reply with channel measurement 3
@@ -536,7 +538,7 @@ class testEchonetLite(unittest.TestCase):
         test_packet = [0x10, 0x81, 0x00, 0x00, 0x02, 0x87, 0x01, 0x0E, 0xF0, 0x01, 0x72, 0x01, 0xC3, 0xC2, 0x00, 0x00, 0x01, 0x60, 0xE7, 0xC2, 0x01, 0x60, 0xE8, 0xD5, 0x01, 0x60, 0xE9, 0xE7, 0x01, 0x60, 0xEA, 0xE5, 0x01, 0x60, 0xEB, 0xEB, 0x01, 0x60, 0xEC, 0xF5, 0x01, 0x60, 0xEE, 0x05, 0x01, 0x60, 0xEF, 0x0A, 0x01, 0x60, 0xF0, 0x0C, 0x01, 0x60, 0xF1, 0x07, 0x01, 0x60, 0xF2, 0x0B, 0x01, 0x60, 0xF3, 0x0D, 0x01, 0x60, 0xF4, 0x17, 0x01, 0x60, 0xF5, 0x0B, 0x01, 0x60, 0xF5, 0xD1, 0x01, 0x60, 0xF6, 0x42, 0x01, 0x60, 0xF6, 0x53, 0x01, 0x60, 0xF6, 0x53, 0x01, 0x60, 0xF6, 0x53, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE] # distribution panel metering "EPC_HISTORICAL_CUMULATIVE_ELECTRIC_ENERGY_NORMAL_DIRECTION_VALUE", test multiple unsigned long
         self.assertEqual(self.obj.parsePacket(test_packet), [0x00, 0x0160E7C2, 0x0160E8D5, 0x0160E9E7, 0x0160EAE5, 0x0160EBEB, 0x0160ECF5, 0x0160EE05, 0x0160EF0A, 0x0160F00C, 0x0160F107, 0x0160F20B, 0x0160F30D, 0x0160F417, 0x0160F50B, 0x0160F5D1, 0x0160F642, 0x0160F653, 0x0160F653, 0x0160F653, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE]) # No data: 0xFF/0xFFFFFFFE
         test_packet = [0x10, 0x81, 0x00, 0x00, 0x02, 0x87, 0x01, 0x0E, 0xF0, 0x01, 0x72, 0x01, 0x9E, 0x10, 0x0F, 0x81, 0x97, 0x98, 0xC5, 0xF1, 0xF2, 0xF3, 0xF4, 0xF5, 0xF7, 0xF8, 0xF9, 0xFD, 0xFE, 0xFF] # distribution panel metering "EPC_SET_PROPERTY_MAP", test multiple unsigned char
-        self.assertEqual(self.obj.parsePacket(test_packet, value_only=False, class_info=True), ['CGC_HOUSING_RELATED', 'CC_DISTRIBUTION_PANEL_METERING', ['CGC_HOUSING_RELATED', 'CC_DISTRIBUTION_PANEL_METERING', [('EPC_SET_PROPERTY_MAP', 15), ('EPC_SET_PROPERTY_MAP', 129), ('EPC_SET_PROPERTY_MAP', 151), ('EPC_SET_PROPERTY_MAP', 152), ('EPC_SET_PROPERTY_MAP', 197), ('EPC_SET_PROPERTY_MAP', 241), ('EPC_SET_PROPERTY_MAP', 242), ('EPC_SET_PROPERTY_MAP', 243), ('EPC_SET_PROPERTY_MAP', 244), ('EPC_SET_PROPERTY_MAP', 245), ('EPC_SET_PROPERTY_MAP', 247), ('EPC_SET_PROPERTY_MAP', 248), ('EPC_SET_PROPERTY_MAP', 249), ('EPC_SET_PROPERTY_MAP', 253), ('EPC_SET_PROPERTY_MAP', 254), ('EPC_SET_PROPERTY_MAP', 255)]]])
+        self.assertEqual(self.obj.parsePacket(test_packet, value_only=False, class_info=True), ['CGC_HOUSING_RELATED', 'CC_DISTRIBUTION_PANEL_METERING', [('EPC_SET_PROPERTY_MAP', 15), ('EPC_SET_PROPERTY_MAP', 129), ('EPC_SET_PROPERTY_MAP', 151), ('EPC_SET_PROPERTY_MAP', 152), ('EPC_SET_PROPERTY_MAP', 197), ('EPC_SET_PROPERTY_MAP', 241), ('EPC_SET_PROPERTY_MAP', 242), ('EPC_SET_PROPERTY_MAP', 243), ('EPC_SET_PROPERTY_MAP', 244), ('EPC_SET_PROPERTY_MAP', 245), ('EPC_SET_PROPERTY_MAP', 247), ('EPC_SET_PROPERTY_MAP', 248), ('EPC_SET_PROPERTY_MAP', 249), ('EPC_SET_PROPERTY_MAP', 253), ('EPC_SET_PROPERTY_MAP', 254), ('EPC_SET_PROPERTY_MAP', 255)]])
         test_packet = [0x10, 0x81, 0x00, 0x00, 0x01, 0x30, 0x01, 0x0E, 0xF0, 0x01, 0x52, 0x06, 0x80, 0x01, 0x31, 0xB3, 0x01, 0x19, 0xBB, 0x01, 0x20, 0xBA, 0x01, 0x34, 0xBD, 0x00, 0xBE, 0x01, 0x7F] # home aircon reply for "EPC_OPERATIONAL_STATUS", "EPC_TEMPERATURE_VALUE_SETTING", "EPC_TEMPERATURE_VALUE", "EPC_RELATIVE_HUMIDITY_VALUE", "EPC_COOLED_AIR_TEMPERATURE_VALUE", "EPC_OUTDOOR_AIR_TEMPERATURE_VALUE"
         self.assertEqual(self.obj.parsePacket(test_packet), ['off', 25, 32, 52, [], 127]) # the empty list [] shows that "EPC_COOLED_AIR_TEMPERATURE_VALUE" is not implemented on the aircon in the iHouse western room 1
 
