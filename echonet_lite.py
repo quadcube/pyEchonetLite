@@ -258,13 +258,14 @@ class EchonetLite():
         OPC = len(EPC) if EPC_EDT == [()] else len(EPC_EDT) # calculate OPC
         if ESV == 'ESV_Get' and EPC_EDT != [()]: ESV = 'ESV_SetC'
         ESV = esv[ESV] if isinstance(ESV, str) else ESV # check whether ESV is str
-        if isinstance(DEOJ_CC, str) and DEOJ_CGC == None:
+        if isinstance(DEOJ_CC, str):
             dcgc_key = self.dictTraverse(eoj_cc, search=DEOJ_CC, key=True)
-            deoj_cgc = eoj_cgc[dcgc_key]
+            deoj_cgc = eoj_cgc[dcgc_key] if DEOJ_CGC == None else DEOJ_CGC
             deoj_cc = eoj_cc[dcgc_key][DEOJ_CC]
         elif isinstance(DEOJ_CC, int) and DEOJ_CGC != None:
             deoj_cgc = DEOJ_CGC if isinstance(DEOJ_CGC, int) else self.dictTraverse(eoj_cgc, search=DEOJ_CGC)
             deoj_cc = DEOJ_CC
+            dcgc_key = self.dictTraverse(eoj_cgc, search=deoj_cgc, key=True)
         else: return -1 # don't accept int DEOJ_CC without providing DEOJ_CGC
         if isinstance(SEOJ_CC, str) and SEOJ_CGC == None:
             scgc_key = self.dictTraverse(eoj_cc, search=SEOJ_CC, key=True)
@@ -284,7 +285,13 @@ class EchonetLite():
             else:
                 target_epc = EPC_EDT[i][0]
                 target_pdc = len([EPC_EDT[i][1]]) if not isinstance(EPC_EDT[i][1], list) else len(EPC_EDT[i][1]) # make sure EPC_EDT[i][1] is a list
-            if isinstance(target_epc, str): target_epc = self.dictTraverse(epc_edt, search=target_epc)
+            if isinstance(target_epc, str):
+                dict_search_epc = None
+                dict_search_epc = self.dictTraverse(epc_edt, search=[DEOJ_CC, target_epc]) if isinstance(DEOJ_CC, str) else self.dictTraverse(epc_edt, search=[self.dictTraverse(eoj_cc, search=DEOJ_CC, key=True), target_epc]) # try finding target EPC raw value
+                if dict_search_epc == None: dict_search_epc = self.dictTraverse(epc_edt, search=[dcgc_key, target_epc]) # handle cases where CC does not have the target EPC code
+                if dict_search_epc == None: dict_search_epc = self.dictTraverse(epc_edt, search=["CGC_SUPERCLASS", target_epc]) # handle cases where CGC does not have the target EPC code
+                if dict_search_epc == None: return -1 # no EPC found for the provided inputs
+                target_epc = dict_search_epc
             self.setnEPC(i+1, target_epc)
             self.setnPDC(i+1, target_pdc)
             if not EPC_EDT == [()]:
@@ -502,12 +509,14 @@ class testEchonetLite(unittest.TestCase):
         self.assertEqual(self.obj.createPacket("CC_TEMPERATURE_SENSOR", EPC=["EPC_OPERATIONAL_STATUS", "EPC_TEMPERATURE_VALUE"]), [0x10, 0x81, 0x00, 0x00, 0x0E, 0xF0, 0x01, 0x00, 0x11, 0x01, 0x62, 0x02, 0x80, 0, 0xE0, 0])
         self.assertEqual(self.obj.createPacket("CC_HOME_AIR_CONDITIONER", ESV='ESV_SetC', EPC_EDT=[("EPC_OPERATIONAL_STATUS",0x30), ("EPC_OPERATION_MODE_SETTING", 0x41)]), [0x10, 0x81, 0x00, 0x00, 0x0E, 0xF0, 0x01, 0x01, 0x30, 0x01, 0x61, 0x02, 0x80, 0x01, 0x30, 0xB0, 0x01, 0x41])
         self.assertEqual(self.obj.createPacket("CC_HOME_AIR_CONDITIONER", ESV='ESV_SetC', EPC_EDT=[("EPC_OPERATIONAL_STATUS", "on"), ("EPC_OPERATION_MODE_SETTING", "automatic")]), [0x10, 0x81, 0x00, 0x00, 0x0E, 0xF0, 0x01, 0x01, 0x30, 0x01, 0x61, 0x02, 0x80, 0x01, 0x30, 0xB0, 0x01, 0x41])
-        self.assertEqual(self.obj.createPacket(0x11, DEOJ_CGC=0x00), [0x10, 0x81, 0x00, 0x00, 0x0E, 0xF0, 0x01, 0x00, 0x11, 0x01, 0x62, 0x01, 0x80, 0x00]) # test whether input raw EOJ_CC and EOJ_CGC
-        self.assertEqual(self.obj.createPacket(0x11, DEOJ_CGC="CGC_SENSOR_RELATED"), [0x10, 0x81, 0x00, 0x00, 0x0E, 0xF0, 0x01, 0x00, 0x11, 0x01, 0x62, 0x01, 0x80, 0x00]) # test whether input raw EOJ_CC and str EOJ_CGC
-        self.assertEqual(self.obj.createPacket("CC_TEMPERATURE_SENSOR", EPC=[0x80, 0xE0]), [0x10, 0x81, 0x00, 0x00, 0x0E, 0xF0, 0x01, 0x00, 0x11, 0x01, 0x62, 0x02, 0x80, 0, 0xE0, 0])
+        self.assertEqual(self.obj.createPacket(0x11, DEOJ_CGC=0x00), [0x10, 0x81, 0x00, 0x00, 0x0E, 0xF0, 0x01, 0x00, 0x11, 0x01, 0x62, 0x01, 0x80, 0x00]) # test raw EOJ_CC and EOJ_CGC
+        self.assertEqual(self.obj.createPacket(0x11, DEOJ_CGC="CGC_SENSOR_RELATED"), [0x10, 0x81, 0x00, 0x00, 0x0E, 0xF0, 0x01, 0x00, 0x11, 0x01, 0x62, 0x01, 0x80, 0x00]) # test raw EOJ_CC and str EOJ_CGC
+        self.assertEqual(self.obj.createPacket("CC_TEMPERATURE_SENSOR", EPC=[0x80, 0xE0]), [0x10, 0x81, 0x00, 0x00, 0x0E, 0xF0, 0x01, 0x00, 0x11, 0x01, 0x62, 0x02, 0x80, 0, 0xE0, 0]) # test raw EPC input
+        self.assertEqual(self.obj.createPacket(0x11, DEOJ_CGC=0x00, EPC=["EPC_OPERATIONAL_STATUS", "EPC_TEMPERATURE_VALUE"]), [0x10, 0x81, 0x00, 0x00, 0x0E, 0xF0, 0x01, 0x00, 0x11, 0x01, 0x62, 0x02, 0x80, 0, 0xE0, 0]) # test raw CC & CGC with str EPC
+        self.assertEqual(self.obj.createPacket("CC_HOME_AIR_CONDITIONER", EPC=["EPC_OPERATIONAL_STATUS", "EPC_TEMPERATURE_VALUE_SETTING", "EPC_TEMPERATURE_VALUE", "EPC_RELATIVE_HUMIDITY_VALUE", "EPC_COOLED_AIR_TEMPERATURE_VALUE", "EPC_OUTDOOR_AIR_TEMPERATURE_VALUE"]), [0x10, 0x81, 0x00, 0x00, 0x0E, 0xF0, 0x01, 0x01, 0x30, 0x01, 0x62, 0x06, 0x80, 0x00, 0xB3, 0x00, 0xBB, 0x00, 0xBA, 0x00, 0xBD, 0x00, 0xBE, 0x00]) # test input with the same EPC naming but different CC/CGC, e.g. "EPC_TEMPERATURE_VALUE": 0xBB in aircon and 0xE0 in temperature sensor
 
     def test_parsePacket(self):
-        test_packet = [0x10, 0x81, 0x00, 0x00, 0x00, 0x11, 0x01, 0x0E, 0xF0, 0x01, 0x72, 0x02, 0x80, 0x01, 0x30, 0xE0, 0x02, 0x00, 0xEB] # temperature sensor
+        test_packet = [0x10, 0x81, 0x00, 0x00, 0x00, 0x11, 0x01, 0x0E, 0xF0, 0x01, 0x72, 0x02, 0x80, 0x01, 0x30, 0xE0, 0x02, 0x00, 0xEB] # temperature sensor reply with temperature value
         self.assertEqual(self.obj.parsePacket(test_packet), ['on', 23.5])
         self.assertEqual(self.obj.parsePacket(test_packet, raw_value=True), [0x30, 0xEB])
         self.assertEqual(self.obj.parsePacket(test_packet, value_only=False), [('EPC_OPERATIONAL_STATUS', 'on'), ('EPC_TEMPERATURE_VALUE', '23.5 Celsius')])
@@ -515,16 +524,17 @@ class testEchonetLite(unittest.TestCase):
         self.assertEqual(self.obj.parsePacket(test_packet, class_info=True), ['CGC_SENSOR_RELATED', 'CC_TEMPERATURE_SENSOR', ['on', 23.5]])
         self.assertEqual(self.obj.parsePacket(test_packet, value_only=False, class_info=True), ['CGC_SENSOR_RELATED', 'CC_TEMPERATURE_SENSOR', [('EPC_OPERATIONAL_STATUS', 'on'), ('EPC_TEMPERATURE_VALUE', '23.5 Celsius')]])
         self.assertEqual(self.obj.parsePacket(test_packet, value_only=False, raw_value=True , class_info=True), ['CGC_SENSOR_RELATED', 'CC_TEMPERATURE_SENSOR', [('EPC_OPERATIONAL_STATUS', 48), ('EPC_TEMPERATURE_VALUE', '235 0.1 Celsius')]])
-        test_packet = [0x10, 0x81, 0x00, 0x00, 0x02, 0x87, 0x01, 0x0E, 0xF0, 0x01, 0x72, 0x02, 0xC2, 0x01, 0x03, 0xD2, 0x08, 0x00, 0x0A, 0xC4, 0x7C, 0x00, 0x00, 0x00, 0x00, 0x00] # distribution panel metering
-        self.assertEqual(self.obj.parsePacket(test_packet), [0.001, [705660, 0.0, 0.0]])
+        test_packet = [0x10, 0x81, 0x00, 0x00, 0x02, 0x87, 0x01, 0x0E, 0xF0, 0x01, 0x72, 0x02, 0xC2, 0x01, 0x03, 0xD2, 0x08, 0x00, 0x0A, 0xC4, 0x7C, 0x00, 0x00, 0x00, 0x00, 0x00] # distribution panel metering reply with channel measurement 3
+        self.assertEqual(self.obj.parsePacket(test_packet), [0.001, [705660, 0.0, 0.0]]) # [unit, [kWh, A, A]]
         self.assertEqual(self.obj.parsePacket(test_packet, raw_value=True), [0x03, [0x0AC47C, 0x00, 0x00]])
         self.assertEqual(self.obj.parsePacket(test_packet, raw_value=False, class_info=True, value_only=True), ['CGC_HOUSING_RELATED', 'CC_DISTRIBUTION_PANEL_METERING', [0.001, [705660, 0.0, 0.0]]])
         self.assertEqual(self.obj.parsePacket(test_packet, raw_value=False, class_info=True, value_only=False), ['CGC_HOUSING_RELATED', 'CC_DISTRIBUTION_PANEL_METERING', [('EPC_CUMULATIVE_ELECTRIC_ENERGY_VALUE_UNIT', '0.001 kWh'), [('EPC_MEASUREMENT_CHANNEL_3', '705660 kWh'), ('EPC_MEASUREMENT_CHANNEL_3', '0.0 A'), ('EPC_MEASUREMENT_CHANNEL_3', '0.0 A')]]])
-        test_packet = [16, 129, 0, 0, 2, 135, 1, 14, 240, 1, 114, 1, 195, 194, 0, 0, 1, 96, 231, 194, 1, 96, 232, 213, 1, 96, 233, 231, 1, 96, 234, 229, 1, 96, 235, 235, 1, 96, 236, 245, 1, 96, 238, 5, 1, 96, 239, 10, 1, 96, 240, 12, 1, 96, 241, 7, 1, 96, 242, 11, 1, 96, 243, 13, 1, 96, 244, 23, 1, 96, 245, 11, 1, 96, 245, 209, 1, 96, 246, 66, 1, 96, 246, 83, 1, 96, 246, 83, 1, 96, 246, 83, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254, 255, 255, 255, 254] # distribution panel metering "EPC_HISTORICAL_CUMULATIVE_ELECTRIC_ENERGY_NORMAL_DIRECTION_VALUE", test multiple unsigned long
+        test_packet = [0x10, 0x81, 0x00, 0x00, 0x02, 0x87, 0x01, 0x0E, 0xF0, 0x01, 0x72, 0x01, 0xC3, 0xC2, 0x00, 0x00, 0x01, 0x60, 0xE7, 0xC2, 0x01, 0x60, 0xE8, 0xD5, 0x01, 0x60, 0xE9, 0xE7, 0x01, 0x60, 0xEA, 0xE5, 0x01, 0x60, 0xEB, 0xEB, 0x01, 0x60, 0xEC, 0xF5, 0x01, 0x60, 0xEE, 0x05, 0x01, 0x60, 0xEF, 0x0A, 0x01, 0x60, 0xF0, 0x0C, 0x01, 0x60, 0xF1, 0x07, 0x01, 0x60, 0xF2, 0x0B, 0x01, 0x60, 0xF3, 0x0D, 0x01, 0x60, 0xF4, 0x17, 0x01, 0x60, 0xF5, 0x0B, 0x01, 0x60, 0xF5, 0xD1, 0x01, 0x60, 0xF6, 0x42, 0x01, 0x60, 0xF6, 0x53, 0x01, 0x60, 0xF6, 0x53, 0x01, 0x60, 0xF6, 0x53, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE, 0xFF, 0xFF, 0xFF, 0xFE] # distribution panel metering "EPC_HISTORICAL_CUMULATIVE_ELECTRIC_ENERGY_NORMAL_DIRECTION_VALUE", test multiple unsigned long
         self.assertEqual(self.obj.parsePacket(test_packet), [0x00, 0x0160E7C2, 0x0160E8D5, 0x0160E9E7, 0x0160EAE5, 0x0160EBEB, 0x0160ECF5, 0x0160EE05, 0x0160EF0A, 0x0160F00C, 0x0160F107, 0x0160F20B, 0x0160F30D, 0x0160F417, 0x0160F50B, 0x0160F5D1, 0x0160F642, 0x0160F653, 0x0160F653, 0x0160F653, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE, 0xFFFFFFFE]) # No data: 0xFF/0xFFFFFFFE
-        print(self.obj.parsePacket(test_packet, value_only=False, class_info=True))
-        test_packet = [16, 129, 0, 0, 2, 135, 1, 14, 240, 1, 114, 1, 158, 16, 15, 129, 151, 152, 197, 241, 242, 243, 244, 245, 247, 248, 249, 253, 254, 255] # distribution panel metering "EPC_SET_PROPERTY_MAP", test multiple unsigned char
+        test_packet = [0x10, 0x81, 0x00, 0x00, 0x02, 0x87, 0x01, 0x0E, 0xF0, 0x01, 0x72, 0x01, 0x9E, 0x10, 0x0F, 0x81, 0x97, 0x98, 0xC5, 0xF1, 0xF2, 0xF3, 0xF4, 0xF5, 0xF7, 0xF8, 0xF9, 0xFD, 0xFE, 0xFF] # distribution panel metering "EPC_SET_PROPERTY_MAP", test multiple unsigned char
         self.assertEqual(self.obj.parsePacket(test_packet, value_only=False, class_info=True), ['CGC_HOUSING_RELATED', 'CC_DISTRIBUTION_PANEL_METERING', ['CGC_HOUSING_RELATED', 'CC_DISTRIBUTION_PANEL_METERING', [('EPC_SET_PROPERTY_MAP', 15), ('EPC_SET_PROPERTY_MAP', 129), ('EPC_SET_PROPERTY_MAP', 151), ('EPC_SET_PROPERTY_MAP', 152), ('EPC_SET_PROPERTY_MAP', 197), ('EPC_SET_PROPERTY_MAP', 241), ('EPC_SET_PROPERTY_MAP', 242), ('EPC_SET_PROPERTY_MAP', 243), ('EPC_SET_PROPERTY_MAP', 244), ('EPC_SET_PROPERTY_MAP', 245), ('EPC_SET_PROPERTY_MAP', 247), ('EPC_SET_PROPERTY_MAP', 248), ('EPC_SET_PROPERTY_MAP', 249), ('EPC_SET_PROPERTY_MAP', 253), ('EPC_SET_PROPERTY_MAP', 254), ('EPC_SET_PROPERTY_MAP', 255)]]])
+        test_packet = [0x10, 0x81, 0x00, 0x00, 0x01, 0x30, 0x01, 0x0E, 0xF0, 0x01, 0x52, 0x06, 0x80, 0x01, 0x31, 0xB3, 0x01, 0x19, 0xBB, 0x01, 0x20, 0xBA, 0x01, 0x34, 0xBD, 0x00, 0xBE, 0x01, 0x7F] # home aircon reply for "EPC_OPERATIONAL_STATUS", "EPC_TEMPERATURE_VALUE_SETTING", "EPC_TEMPERATURE_VALUE", "EPC_RELATIVE_HUMIDITY_VALUE", "EPC_COOLED_AIR_TEMPERATURE_VALUE", "EPC_OUTDOOR_AIR_TEMPERATURE_VALUE"
+        self.assertEqual(self.obj.parsePacket(test_packet), ['off', 25, 32, 52, [], 127])
 
 
 if __name__ == '__main__':
