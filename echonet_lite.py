@@ -306,7 +306,7 @@ class EchonetLite():
     #       4. Return CGC and CC class info as a list [CGC, CC, (...)] or [CGC, CC, [...]] if class_info is True
     #       5. Support auto conversion for unsigned char, signed char, unsigned short, signed short, unsigned long, signed long
     #       6. TODO: add EDT range validation
-    def parsePacket(self, obj, value_only=True, raw_value=False, class_info=False):
+    def parsePacket(self, obj, value_only=True, raw_value=False, class_info=False, SEOJ_IC=False):
         global ehd, eoj_cgc, eoj_cc, esv, epc, epc_edt, il, fd
         try:
             if len(obj) > 12 and obj[0] == ehd['EHD1_ECHONET'] and obj[1] == ehd['EHD2_FORMAT1']:
@@ -398,12 +398,14 @@ class EchonetLite():
             
                     if len(temp_return_value) == 1: return_value.append(temp_return_value[0]) # unpack list
                     else: return_value.append(temp_return_value) # return whole list
-                if class_info == False:
-                    if len(return_value) == 1: return_value = return_value[0] # finally, unpack list
-                    return return_value # finally return the values
-                else:
+                if SEOJ_IC == True:
+                    if len(return_value) == 1: return_value = [('IC', self.echonet_packet[6]), return_value[0]] # get SEOJ_IC and append to the front
+                    return_value = [('IC', self.echonet_packet[6]), return_value]
+                if class_info == True:
                     if len(return_value) == 1: return_value = [cgc_str, cc_str, return_value[0]] # finally, unpack list
-                    return [cgc_str, cc_str, return_value] # finally return the values
+                    return_value = [cgc_str, cc_str] + return_value if SEOJ_IC == True else [cgc_str, cc_str, return_value]
+                if len(return_value) == 1: return_value = return_value[0] # finally, unpack list
+                return return_value # finally return the values
             else:
                 logging.error("parsePacket() invalid Echonet Lite packet.")
                 return -1
@@ -517,12 +519,14 @@ class testEchonetLite(unittest.TestCase):
 
     def test_parsePacket(self):
         test_packet = [0x10, 0x81, 0x00, 0x00, 0x00, 0x11, 0x01, 0x0E, 0xF0, 0x01, 0x72, 0x02, 0x80, 0x01, 0x30, 0xE0, 0x02, 0x00, 0xEB] # temperature sensor reply with temperature value
-        self.assertEqual(self.obj.parsePacket(test_packet), ['on', 23.5])
-        self.assertEqual(self.obj.parsePacket(test_packet, raw_value=True), [0x30, 0xEB])
+        self.assertEqual(self.obj.parsePacket(test_packet), ['on', 23.5]) # test default return
+        self.assertEqual(self.obj.parsePacket(test_packet, SEOJ_IC=True), [('IC', 1), ['on', 23.5]]) # test appending SEOJ_IC
+        self.assertEqual(self.obj.parsePacket(test_packet, raw_value=True), [0x30, 0xEB]) # return values as raw values
         self.assertEqual(self.obj.parsePacket(test_packet, value_only=False), [('EPC_OPERATIONAL_STATUS', 'on'), ('EPC_TEMPERATURE_VALUE', '23.5 Celsius')])
         self.assertEqual(self.obj.parsePacket(test_packet, value_only=False, raw_value=True), [('EPC_OPERATIONAL_STATUS', 48), ('EPC_TEMPERATURE_VALUE', '235 0.1 Celsius')])
         self.assertEqual(self.obj.parsePacket(test_packet, class_info=True), ['CGC_SENSOR_RELATED', 'CC_TEMPERATURE_SENSOR', ['on', 23.5]])
         self.assertEqual(self.obj.parsePacket(test_packet, value_only=False, class_info=True), ['CGC_SENSOR_RELATED', 'CC_TEMPERATURE_SENSOR', [('EPC_OPERATIONAL_STATUS', 'on'), ('EPC_TEMPERATURE_VALUE', '23.5 Celsius')]])
+        self.assertEqual(self.obj.parsePacket(test_packet, value_only=False, class_info=True, SEOJ_IC=True), ['CGC_SENSOR_RELATED', 'CC_TEMPERATURE_SENSOR', ('IC', 1), [('EPC_OPERATIONAL_STATUS', 'on'), ('EPC_TEMPERATURE_VALUE', '23.5 Celsius')]]) # test appending SEOJ_IC
         self.assertEqual(self.obj.parsePacket(test_packet, value_only=False, raw_value=True , class_info=True), ['CGC_SENSOR_RELATED', 'CC_TEMPERATURE_SENSOR', [('EPC_OPERATIONAL_STATUS', 48), ('EPC_TEMPERATURE_VALUE', '235 0.1 Celsius')]])
         test_packet = [0x10, 0x81, 0x00, 0x00, 0x02, 0x87, 0x01, 0x0E, 0xF0, 0x01, 0x72, 0x02, 0xC2, 0x01, 0x03, 0xD2, 0x08, 0x00, 0x0A, 0xC4, 0x7C, 0x00, 0x00, 0x00, 0x00, 0x00] # distribution panel metering reply with channel measurement 3
         self.assertEqual(self.obj.parsePacket(test_packet), [0.001, [705660, 0.0, 0.0]]) # [unit, [kWh, A, A]]
@@ -534,7 +538,7 @@ class testEchonetLite(unittest.TestCase):
         test_packet = [0x10, 0x81, 0x00, 0x00, 0x02, 0x87, 0x01, 0x0E, 0xF0, 0x01, 0x72, 0x01, 0x9E, 0x10, 0x0F, 0x81, 0x97, 0x98, 0xC5, 0xF1, 0xF2, 0xF3, 0xF4, 0xF5, 0xF7, 0xF8, 0xF9, 0xFD, 0xFE, 0xFF] # distribution panel metering "EPC_SET_PROPERTY_MAP", test multiple unsigned char
         self.assertEqual(self.obj.parsePacket(test_packet, value_only=False, class_info=True), ['CGC_HOUSING_RELATED', 'CC_DISTRIBUTION_PANEL_METERING', ['CGC_HOUSING_RELATED', 'CC_DISTRIBUTION_PANEL_METERING', [('EPC_SET_PROPERTY_MAP', 15), ('EPC_SET_PROPERTY_MAP', 129), ('EPC_SET_PROPERTY_MAP', 151), ('EPC_SET_PROPERTY_MAP', 152), ('EPC_SET_PROPERTY_MAP', 197), ('EPC_SET_PROPERTY_MAP', 241), ('EPC_SET_PROPERTY_MAP', 242), ('EPC_SET_PROPERTY_MAP', 243), ('EPC_SET_PROPERTY_MAP', 244), ('EPC_SET_PROPERTY_MAP', 245), ('EPC_SET_PROPERTY_MAP', 247), ('EPC_SET_PROPERTY_MAP', 248), ('EPC_SET_PROPERTY_MAP', 249), ('EPC_SET_PROPERTY_MAP', 253), ('EPC_SET_PROPERTY_MAP', 254), ('EPC_SET_PROPERTY_MAP', 255)]]])
         test_packet = [0x10, 0x81, 0x00, 0x00, 0x01, 0x30, 0x01, 0x0E, 0xF0, 0x01, 0x52, 0x06, 0x80, 0x01, 0x31, 0xB3, 0x01, 0x19, 0xBB, 0x01, 0x20, 0xBA, 0x01, 0x34, 0xBD, 0x00, 0xBE, 0x01, 0x7F] # home aircon reply for "EPC_OPERATIONAL_STATUS", "EPC_TEMPERATURE_VALUE_SETTING", "EPC_TEMPERATURE_VALUE", "EPC_RELATIVE_HUMIDITY_VALUE", "EPC_COOLED_AIR_TEMPERATURE_VALUE", "EPC_OUTDOOR_AIR_TEMPERATURE_VALUE"
-        self.assertEqual(self.obj.parsePacket(test_packet), ['off', 25, 32, 52, [], 127])
+        self.assertEqual(self.obj.parsePacket(test_packet), ['off', 25, 32, 52, [], 127]) # the empty list [] shows that "EPC_COOLED_AIR_TEMPERATURE_VALUE" is not implemented on the aircon in the iHouse western room 1
 
 
 if __name__ == '__main__':
