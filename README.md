@@ -1,5 +1,5 @@
 # pyEchonetLite: Echonet Lite for Human
-Too lazy to search specification documents for mundane stuffs like Class Group Code, source EOJ, ESV, etc.? 
+Too lazy to search specification documents for mundane stuffs like Class Code (CC), Class Group Code (CGC), source EOJ, ESV, etc.? 
 pyEchonetLite was created to make interfacing with Echonet Lite devices a breeze.
 Written in Python 3, require no external dependencies, pure Python!
 
@@ -8,7 +8,7 @@ Written in Python 3, require no external dependencies, pure Python!
 ```
 createPacket("CC_TEMPERATURE_SENSOR")
 ```
-
+Search **echonet_lite_EOJ_CC.json** in **json** folder for more details about various Echonet Lite device name/class code.
 
 #### Parsing an Echonet Lite packet?
 ```
