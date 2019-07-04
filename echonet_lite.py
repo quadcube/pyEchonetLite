@@ -259,22 +259,39 @@ class EchonetLite():
         if ESV == 'ESV_Get' and EPC_EDT != [()]: ESV = 'ESV_SetC'
         ESV = esv[ESV] if isinstance(ESV, str) else ESV # check whether ESV is str
         if isinstance(DEOJ_CC, str):
+            if "CC_" not in DEOJ_CC: DEOJ_CC = "CC_" + DEOJ_CC # append CC_ header if it's not found
+            DEOJ_CC = DEOJ_CC.replace(" ", "_").upper() # replace all space with _ and change the entire string to upper case
             dcgc_key = self.dictTraverse(eoj_cc, search=DEOJ_CC, key=True)
+            if dcgc_key == None:
+                logging.error("createPacket() Destination class group code (CGC) not found from the provided input (DEOJ_CC).")
+                return -1
             deoj_cgc = eoj_cgc[dcgc_key] if DEOJ_CGC == None else DEOJ_CGC
             deoj_cc = eoj_cc[dcgc_key][DEOJ_CC]
         elif isinstance(DEOJ_CC, int) and DEOJ_CGC != None:
             deoj_cgc = DEOJ_CGC if isinstance(DEOJ_CGC, int) else self.dictTraverse(eoj_cgc, search=DEOJ_CGC)
             deoj_cc = DEOJ_CC
             dcgc_key = self.dictTraverse(eoj_cgc, search=deoj_cgc, key=True)
-        else: return -1 # don't accept int DEOJ_CC without providing DEOJ_CGC
+        else:
+            logging.error("createPacket() Integer DEOJ_CC is not accepted without providing DEOJ_CGC.")
+            return -1 # don't accept int DEOJ_CC without providing DEOJ_CGC
         if isinstance(SEOJ_CC, str) and SEOJ_CGC == None:
+            if "CC_" not in SEOJ_CC: SEOJ_CC = "CC_" + SEOJ_CC # append CC_ header if it's not found
+            SEOJ_CC = SEOJ_CC.replace(" ", "_").upper() # replace all space with _ and change the entire string to upper case
             scgc_key = self.dictTraverse(eoj_cc, search=SEOJ_CC, key=True)
+            if scgc_key == None:
+                logging.error("createPacket() Source class group code (CGC) not found from the provided input (SEOJ_CC).")
+                return -1
             seoj_cgc = eoj_cgc[scgc_key]
             seoj_cc = eoj_cc[scgc_key][SEOJ_CC]
         elif isinstance(SEOJ_CC, int) and SEOJ_CGC != None:
             seoj_cgc = SEOJ_CGC if isinstance(SEOJ_CGC, int) else self.dictTraverse(eoj_cgc, search=SEOJ_CGC)
+            if seoj_cgc == None:
+                logging.error("createPacket() Source class group code (CGC) not found from the provided input (SEOJ_CGC).")
+                return -1
             seoj_cc = SEOJ_CC
-        else: return -1 # don't accept int SEOJ_CC without providing SEOJ_CGC
+        else:
+            logging.error("createPacket() Integer SEOJ_CC is not accepted without providing SEOJ_CGC.")
+            return -1 # don't accept int SEOJ_CC without providing SEOJ_CGC
         self.echonet_packet[:] = [0 for _ in self.echonet_packet[:]] # reset global var
         self.echonet_packet[:12] = [ehd['EHD1_ECHONET'], ehd['EHD2_FORMAT1'], TID[0], TID[1], seoj_cgc, seoj_cc, SEOJ_IC, deoj_cgc, deoj_cc, DEOJ_IC, ESV, OPC]
         self.current_echonet_packet_len = 12 # reset current Echonet packet length
@@ -286,11 +303,15 @@ class EchonetLite():
                 target_epc = EPC_EDT[i][0]
                 target_pdc = len([EPC_EDT[i][1]]) if not isinstance(EPC_EDT[i][1], list) else len(EPC_EDT[i][1]) # make sure EPC_EDT[i][1] is a list
             if isinstance(target_epc, str):
+                if "EPC_" not in target_epc: target_epc = "EPC_" + target_epc # append EPC_ header if it's not found
+                target_epc = target_epc.replace(" ", "_").upper() # replace all space with _ and change the entire string to upper case
                 dict_search_epc = None
                 dict_search_epc = self.dictTraverse(epc_edt, search=[DEOJ_CC, target_epc]) if isinstance(DEOJ_CC, str) else self.dictTraverse(epc_edt, search=[self.dictTraverse(eoj_cc, search=DEOJ_CC, key=True), target_epc]) # try finding target EPC raw value
                 if dict_search_epc == None: dict_search_epc = self.dictTraverse(epc_edt, search=[dcgc_key, target_epc]) # handle cases where CC does not have the target EPC code
                 if dict_search_epc == None: dict_search_epc = self.dictTraverse(epc_edt, search=["CGC_SUPERCLASS", target_epc]) # handle cases where CGC does not have the target EPC code
-                if dict_search_epc == None: return -1 # no EPC found for the provided inputs
+                if dict_search_epc == None:
+                    logging.error("createPacket() EPC not found.")
+                    return -1 # no EPC found for the provided inputs
                 target_epc = dict_search_epc
             self.setnEPC(i+1, target_epc)
             self.setnPDC(i+1, target_pdc)
@@ -517,6 +538,7 @@ class testEchonetLite(unittest.TestCase):
         self.assertEqual(self.obj.createPacket("CC_TEMPERATURE_SENSOR", EPC=[0x80, 0xE0]), [0x10, 0x81, 0x00, 0x00, 0x0E, 0xF0, 0x01, 0x00, 0x11, 0x01, 0x62, 0x02, 0x80, 0, 0xE0, 0]) # test raw EPC input
         self.assertEqual(self.obj.createPacket(0x11, DEOJ_CGC=0x00, EPC=["EPC_OPERATIONAL_STATUS", "EPC_TEMPERATURE_VALUE"]), [0x10, 0x81, 0x00, 0x00, 0x0E, 0xF0, 0x01, 0x00, 0x11, 0x01, 0x62, 0x02, 0x80, 0, 0xE0, 0]) # test raw CC & CGC with str EPC
         self.assertEqual(self.obj.createPacket("CC_HOME_AIR_CONDITIONER", EPC=["EPC_OPERATIONAL_STATUS", "EPC_TEMPERATURE_VALUE_SETTING", "EPC_TEMPERATURE_VALUE", "EPC_RELATIVE_HUMIDITY_VALUE", "EPC_COOLED_AIR_TEMPERATURE_VALUE", "EPC_OUTDOOR_AIR_TEMPERATURE_VALUE"]), [0x10, 0x81, 0x00, 0x00, 0x0E, 0xF0, 0x01, 0x01, 0x30, 0x01, 0x62, 0x06, 0x80, 0x00, 0xB3, 0x00, 0xBB, 0x00, 0xBA, 0x00, 0xBD, 0x00, 0xBE, 0x00]) # test input with the same EPC naming but different CC/CGC, e.g. "EPC_TEMPERATURE_VALUE": 0xBB in aircon and 0xE0 in temperature sensor
+        self.assertEqual(self.obj.createPacket("temperature sensor", EPC=["operational status", "temperature value"]), [0x10, 0x81, 0x00, 0x00, 0x0E, 0xF0, 0x01, 0x00, 0x11, 0x01, 0x62, 0x02, 0x80, 0, 0xE0, 0])
 
     def test_parsePacket(self):
         test_packet = [0x10, 0x81, 0x00, 0x00, 0x00, 0x11, 0x01, 0x0E, 0xF0, 0x01, 0x72, 0x02, 0x80, 0x01, 0x30, 0xE0, 0x02, 0x00, 0xEB] # temperature sensor reply with temperature value
@@ -541,7 +563,6 @@ class testEchonetLite(unittest.TestCase):
         self.assertEqual(self.obj.parsePacket(test_packet, value_only=False, class_info=True), ['CGC_HOUSING_RELATED', 'CC_DISTRIBUTION_PANEL_METERING', [('EPC_SET_PROPERTY_MAP', 15), ('EPC_SET_PROPERTY_MAP', 129), ('EPC_SET_PROPERTY_MAP', 151), ('EPC_SET_PROPERTY_MAP', 152), ('EPC_SET_PROPERTY_MAP', 197), ('EPC_SET_PROPERTY_MAP', 241), ('EPC_SET_PROPERTY_MAP', 242), ('EPC_SET_PROPERTY_MAP', 243), ('EPC_SET_PROPERTY_MAP', 244), ('EPC_SET_PROPERTY_MAP', 245), ('EPC_SET_PROPERTY_MAP', 247), ('EPC_SET_PROPERTY_MAP', 248), ('EPC_SET_PROPERTY_MAP', 249), ('EPC_SET_PROPERTY_MAP', 253), ('EPC_SET_PROPERTY_MAP', 254), ('EPC_SET_PROPERTY_MAP', 255)]])
         test_packet = [0x10, 0x81, 0x00, 0x00, 0x01, 0x30, 0x01, 0x0E, 0xF0, 0x01, 0x52, 0x06, 0x80, 0x01, 0x31, 0xB3, 0x01, 0x19, 0xBB, 0x01, 0x20, 0xBA, 0x01, 0x34, 0xBD, 0x00, 0xBE, 0x01, 0x7F] # home aircon reply for "EPC_OPERATIONAL_STATUS", "EPC_TEMPERATURE_VALUE_SETTING", "EPC_TEMPERATURE_VALUE", "EPC_RELATIVE_HUMIDITY_VALUE", "EPC_COOLED_AIR_TEMPERATURE_VALUE", "EPC_OUTDOOR_AIR_TEMPERATURE_VALUE"
         self.assertEqual(self.obj.parsePacket(test_packet), ['off', 25, 32, 52, [], 127]) # the empty list [] shows that "EPC_COOLED_AIR_TEMPERATURE_VALUE" is not implemented on the aircon in the iHouse western room 1
-
 
 if __name__ == '__main__':
     unittest.main()
