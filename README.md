@@ -7,9 +7,10 @@ Written in Python 3, require no external dependencies, pure Python!
 #### Wanna create an Echonet Lite packet?
 ```
 createPacket("CC_TEMPERATURE_SENSOR")
+createPacket("temperature sensor", EPC=["operational status", "temperature value"])
 ```
 Search **echonet_lite_EOJ_CC.json** in **json** folder for more details about various Echonet Lite device name/class code.
-
+Information about Echonet Lite properties (EPC) can be found in **echonet_lite_EPC_EDT.json** in **json** folder.
 #### Parsing an Echonet Lite packet?
 ```
 parsePacket(echonetlite_packet)
@@ -24,4 +25,4 @@ value = obj.parsePacket(echonetlite_packet)
 ```
 
 
-Check test unit in echonet_lite.py for various use cases.
+Check test unit in echonet_lite.py for various possible use cases.
